@@ -1,0 +1,65 @@
+@use "sass:color";
+@use "./variables" as *;
+@use "./mixins" as *;
+@use "./responsive" as *;
+
+// Reset & base
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: $font-family;
+  font-size: $font-size-base;
+  background-color: $background-color;
+  color: $text-color;
+  line-height: 1.6;
+  height: 100%;
+}
+
+// Links
+a {
+  color: $primary-color;
+  text-decoration: none;
+  @include transition(color 0.3s);
+
+  &:hover {
+    color: color.adjust($primary-color, $lightness: -10%);
+  }
+}
+
+// Buttons
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: $border-radius;
+  background-color: $primary-color;
+  color: $white;
+  cursor: pointer;
+  @include transition(background-color 0.3s);
+
+  &:hover {
+    background-color: color.adjust($primary-color, $lightness: -8%);
+  }
+
+  &:active {
+    background-color: color.adjust($primary-color, $lightness: -12%);
+  }
+}
+
+// Utilities
+.container {
+  @include container();
+}
+
+.text-center {
+  text-align: center;
+}
+
+.hidden {
+  display: none !important;
+}
