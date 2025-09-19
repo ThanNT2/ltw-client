@@ -3,25 +3,215 @@
 @use "../../assets/styles/responsive" as *;
 
 .mainLayout {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "sidebar content"
+    "footer footer";
+  grid-template-columns: 260px 1fr;
+  grid-template-rows: auto 1fr auto;
   min-height: 100vh;
+  background-color: $background-color;
+  gap: 0;
 
-  .body {
-    display: grid;
-    grid-template-columns: 250px 1fr; // Sidebar 250px, Content auto
-    flex: 1;
+  @include respond-to(md) {
+    grid-template-areas:
+      "header"
+      "content"
+      "footer";
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+/* Header */
+.header {
+  grid-area: header;
+  background: $white;
+  border-bottom: 1px solid $border-color;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  margin-bottom: 0;
+  padding: 0;
+  width: 100%;
+
+  .headerContent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+    padding: 0;
+    margin: 0;
+    width: 100%;
 
     @include respond-to(md) {
-      grid-template-columns: 1fr;
-      position: relative;
+      height: 56px;
+    }
+
+    .menuToggle {
+      display: none;
+      background: none;
+      border: none;
+      color: $text-color;
+      cursor: pointer;
+
+      @include respond-to(md) {
+        display: block;
+      }
+    }
+  }
+}
+
+/* Sidebar */
+.sidebar {
+  grid-area: sidebar;
+  background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0;
+  transition: $transition;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: 0;
+  height: calc(100vh - 72px); // Full height minus header
+  position: sticky;
+  top: 72px; // Stick below header
+
+  // Modern scrollbar - hidden by default, show on hover
+  &::-webkit-scrollbar {
+    width: 8px;
+    transition: all 0.3s ease;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+      }
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.03);
     }
   }
 
-  .content {
-    background-color: $background-color;
-    padding: 1.5rem 2rem;
-    overflow-x: hidden;
-    min-height: calc(100vh - 64px - 60px); // header + footer height
+  // Firefox scrollbar
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+
+  &:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.15) rgba(255, 255, 255, 0.03);
   }
+
+  @include respond-to(md) {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 280px;
+    height: 100vh; // Full viewport height on mobile
+    z-index: 1100;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 100%);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  &.open {
+    @include respond-to(md) {
+      left: 0;
+    }
+  }
+
+  .sidebarHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .closeBtn {
+      display: none;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      @include respond-to(md) {
+        display: block;
+      }
+    }
+  }
+}
+
+/* Overlay cho mobile */
+.overlay {
+  display: none;
+
+  @include respond-to(md) {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba($black, 0.5);
+    z-index: 1000;
+  }
+}
+
+/* Content */
+.content {
+  grid-area: content;
+  padding: 1rem;
+  height: calc(100vh - 72px); // Full height minus header
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: 0;
+  position: sticky;
+  top: 72px; // Stick below header
+
+  @include respond-to(md) {
+    padding: 0.75rem;
+    height: calc(100vh - 56px); // Mobile header height
+    top: 56px;
+  }
+}
+
+/* Footer */
+.footer {
+  grid-area: footer;
+  background: $white;
+  border-top: 1px solid $border-color;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: $secondary-color;
 }
