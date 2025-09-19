@@ -1,20 +1,13 @@
+// src/pages/Home/HomePage.jsx
 import React from "react";
-import { useDispatch } from "react-redux";
-import { logoutThunk } from "../../stores/thunks/userThunks"; // đường dẫn chỉnh lại cho đúng
 
-function HomePage() {
-  const dispatch = useDispatch();
-
-  const handleLogout = () => {
-    dispatch(logoutThunk());
-  };
-
+const HomePage = () => {
   return (
     <div>
-      <h1>Xin chào, đây là HomePage!</h1>
-      <button onClick={handleLogout}>Logout</button>
+      <h2>Welcome to MyApp 🎉</h2>
+      <p>This is the homepage content.</p>
     </div>
   );
-}
+};
 
 export default HomePage;

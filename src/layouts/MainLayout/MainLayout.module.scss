@@ -1,0 +1,27 @@
+@use "../../assets/styles/variables" as *;
+@use "../../assets/styles/mixins" as *;
+@use "../../assets/styles/responsive" as *;
+
+.mainLayout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  .body {
+    display: grid;
+    grid-template-columns: 250px 1fr; // Sidebar 250px, Content auto
+    flex: 1;
+
+    @include respond-to(md) {
+      grid-template-columns: 1fr;
+      position: relative;
+    }
+  }
+
+  .content {
+    background-color: $background-color;
+    padding: 1.5rem 2rem;
+    overflow-x: hidden;
+    min-height: calc(100vh - 64px - 60px); // header + footer height
+  }
+}

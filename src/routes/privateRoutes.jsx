@@ -1,5 +1,5 @@
 import ChangePasswordPage from "../pages/Auth/ChangedPasswordPage";
-import UserProfilePage from "../pages/User/ProfilePage";
+import UserProfilePage from "../pages/User/Profile/ProfilePage";
 // import DashboardPage from "../pages/Dashboard/DashboardPage";
 
 const privateRoutes = [

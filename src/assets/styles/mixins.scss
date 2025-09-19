@@ -1,16 +1,14 @@
-// Mixins
-
 @mixin flex-center {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-@mixin container($max-width: 1200px) {
+@mixin container($max-width: null) {
   width: 100%;
-  max-width: $max-width;
+  max-width: if($max-width != null, $max-width, none);
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 2rem; // padding cố định cho toàn trang
 }
 
 @mixin transition($props...) {

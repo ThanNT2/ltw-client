@@ -1,9 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import publicRoutes from "./routes/publicRoutes";
 import privateRoutes from "./routes/privateRoutes";
 import PrivateRoute from "./components/PrivateRoute";
 
-//debug
+// debug
 import TokenDebug from "./debug/TokenDebug.jsx";
 
 function App() {
@@ -12,18 +12,20 @@ function App() {
       <Routes>
         {/* Public routes */}
         {publicRoutes.map(({ path, element }, index) => (
-          <Route key={index} path={path} element={element} />
+          <Route key={`public-${index}`} path={path} element={element} />
         ))}
 
         {/* Private routes */}
         {privateRoutes.map(({ path, element }, index) => (
           <Route
-            key={index}
+            key={`private-${index}`}
             path={path}
             element={<PrivateRoute>{element}</PrivateRoute>}
           />
         ))}
       </Routes>
+
+      {/* Debug tool (dev only) */}
       {/* <TokenDebug /> */}
     </>
   );

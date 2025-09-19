@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../../stores/selectors/userSelectors";
+import { selectCurrentUser } from "../../../stores/selectors/userSelectors";
 
 function ProfilePage() {
   const user = useSelector(selectCurrentUser);

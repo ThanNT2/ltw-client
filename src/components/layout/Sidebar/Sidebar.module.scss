@@ -1,0 +1,25 @@
+@use "../../../assets/styles/variables.scss" as *;
+@use "../../../assets/styles/mixins.scss" as *;
+@use"../../../assets/styles/responsive.scss" as *;
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: $border-radius;
+    font-weight: 500;
+    color: $text-color;
+    @include transition(background-color 0.3s);
+
+    &:hover {
+      background: rgba($primary-color, 0.08);
+      color: $primary-color;
+    }
+  }
+}
