@@ -1,9 +1,9 @@
 // src/layouts/UserLayout/UserLayout.jsx
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import Header from "../MainLayout/Header"; // ✅ dùng chung Header với MainLayout
-import Footer from "../MainLayout/Footer"; // ✅ dùng chung Footer
-import UserSidebar from "./UserSidebar";   // Sidebar riêng cho user
+import Header from "../../components/layout/Header/Header";
+import Footer from "../../components/layout/Footer/Footer";
+import UserSidebar from "../../components/layout/Sidebar/UserSidebar";
 import styles from "./UserLayout.module.scss";
 
 const UserLayout = () => {
@@ -28,7 +28,7 @@ const UserLayout = () => {
           />
         )}
 
-        <UserSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <UserSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <div className={styles.content}>
           <Outlet /> {/* ✅ render page con */}

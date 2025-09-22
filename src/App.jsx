@@ -35,14 +35,34 @@ function App() {
           }
         })}
 
-        {/* Private routes */}
-        {privateRoutes.map(({ path, element }, index) => (
-          <Route
-            key={`private-${index}`}
-            path={path}
-            element={<PrivateRoute>{element}</PrivateRoute>}
-          />
-        ))}
+        {/* Private routes (support nested) */}
+        {privateRoutes.map((route, index) => {
+          if (route.children) {
+            return (
+              <Route
+                key={`private-${index}`}
+                path={route.path}
+                element={<PrivateRoute>{route.element}</PrivateRoute>}
+              >
+                {route.children.map((child, childIndex) => (
+                  <Route
+                    key={`private-${index}-${childIndex}`}
+                    index={child.index}
+                    path={child.path}
+                    element={child.element}
+                  />
+                ))}
+              </Route>
+            );
+          }
+          return (
+            <Route
+              key={`private-${index}`}
+              path={route.path}
+              element={<PrivateRoute>{route.element}</PrivateRoute>}
+            />
+          );
+        })}
       </Routes>
 
       {/* Debug tool (dev only) */}

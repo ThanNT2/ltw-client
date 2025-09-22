@@ -1,3 +1,7 @@
+@use "../../assets/styles/variables" as *;
+@use "../../assets/styles/mixins" as *;
+@use "../../assets/styles/responsive" as *;
+
 .userLayout {
   display: flex;
   flex-direction: column;
@@ -8,15 +12,25 @@
     display: grid;
     grid-template-columns: 260px 1fr;
     flex: 1;
+    margin-top: 72px; // offset sticky header height
 
     @include respond-to(md) {
       grid-template-columns: 1fr; // Ẩn sidebar trên mobile
+      margin-top: 56px; // mobile header height
     }
   }
 
   .content {
     padding: 1rem;
     overflow-y: auto;
+    height: calc(100vh - 72px);
+    position: sticky;
+    top: 72px;
+
+    @include respond-to(md) {
+      height: calc(100vh - 56px);
+      top: 56px;
+    }
   }
 
   .overlay {

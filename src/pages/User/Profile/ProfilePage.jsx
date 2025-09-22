@@ -10,10 +10,10 @@ function ProfilePage() {
   }
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ padding: "20px", maxWidth: 960, margin: "0 auto" }}>
       <h1>Thông tin cá nhân</h1>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
         <img
           src={user.avatar || "/default_avatar.png"}
           alt="Avatar"

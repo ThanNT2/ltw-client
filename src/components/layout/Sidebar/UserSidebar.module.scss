@@ -5,10 +5,12 @@
 .sidebar {
   background: linear-gradient(180deg, #0f1419 0%, #1a1f2e 100%);
   color: $white;
-  height: 100%;
+  height: calc(100vh - 72px);
   padding: 1rem;
   overflow-y: auto;
   transition: left 0.3s ease;
+  position: sticky;
+  top: 72px;
 
   @include respond-to(md) {
     position: fixed;
