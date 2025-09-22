@@ -48,44 +48,44 @@ function LoginPage() {
   };
 
   return (
-    <div className={styles.authWrapper}>
-      <form onSubmit={handleSubmit} className={styles.authForm}>
-        <h2 className={styles.title}>Đăng nhập</h2>
+    <form onSubmit={handleSubmit} className={styles.authForm}>
+      <h2 className={styles.title}>Đăng nhập</h2>
 
-        {error && <p className={styles.error}>{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
 
-        <div className={styles.formGroup}>
-          <label>Email</label>
-          <input
-            type="email"
-            name="email"
-            value={credentials.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <PasswordInput
-          label="Mật khẩu"
-          name="password"
-          value={credentials.password}
+      <div className={styles.formGroup}>
+        <label>Email</label>
+        <input
+          type="email"
+          name="email"
+          value={credentials.email}
           onChange={handleChange}
+          placeholder="Nhập email của bạn"
+          required
         />
+      </div>
 
-        <button
-          type="submit"
-          className={styles.submitBtn}
-          disabled={loading}
-        >
-          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-        </button>
+      <PasswordInput
+        label="Mật khẩu"
+        name="password"
+        value={credentials.password}
+        onChange={handleChange}
+        placeholder="Nhập mật khẩu"
+      />
 
-        <div className={styles.links}>
-          <Link to="/forgot-password">Quên mật khẩu?</Link>
-          <Link to="/register">Đăng ký</Link>
-        </div>
-      </form>
-    </div>
+      <button
+        type="submit"
+        className={styles.submitBtn}
+        disabled={loading}
+      >
+        {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+      </button>
+
+      <div className={styles.links}>
+        <Link to="/forgot-password">Quên mật khẩu?</Link>
+        <Link to="/register">Đăng ký</Link>
+      </div>
+    </form>
   );
 }
 

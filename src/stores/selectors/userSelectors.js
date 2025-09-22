@@ -12,3 +12,4 @@ export const selectAccessToken = (state) => {
 export const selectUserLoading = (state) => state.user.loading;
 
 export const selectUserError = (state) => state.user.error;
+export const selectUserLogout = (state) => state.user.logout;

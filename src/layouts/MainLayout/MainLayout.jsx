@@ -1,16 +1,15 @@
 // src/layouts/MainLayout/MainLayout.jsx
 import React, { useState } from "react";
+import { Outlet } from "react-router-dom";
 import styles from "./MainLayout.module.scss";
 import { X } from "lucide-react";
-
 
 // Layout components
 import Header from "../../components/layout/Header/Header";
 import Sidebar from "../../components/layout/Sidebar/MainSidebar";
 import Footer from "../../components/layout/Footer/Footer";
 
-
-const MainLayout = ({ children }) => {
+const MainLayout = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -46,8 +45,10 @@ const MainLayout = ({ children }) => {
         />
       )}
 
-      {/* Main content */}
-      <main className={styles.content}>{children}</main>
+      {/* Main content - Outlet for child routes */}
+      <main className={styles.content}>
+        <Outlet />
+      </main>
 
       {/* Footer */}
       <footer className={styles.footer}>

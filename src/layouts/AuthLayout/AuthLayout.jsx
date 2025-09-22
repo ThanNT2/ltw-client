@@ -1,23 +1,32 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import styles from "./AuthLayout.module.scss";
 
 const AuthLayout = ({ children }) => {
   return (
     <div className={styles.authLayout}>
-      <div className={styles.authContainer}>
-        {/* Logo / Title */}
-        <div className={styles.authHeader}>
-          <h1 className={styles.logo}>MyApp</h1>
-        </div>
+      {/* Background Pattern */}
+      <div className={styles.backgroundPattern}></div>
 
-        {/* Content (Form Login/Register/etc.) */}
-        <div className={styles.authContent}>{children}</div>
+      {/* Header */}
+      <header className={styles.authHeader}>
+        <Link to="/" className={styles.logo}>
+          <img src="/vite.svg" alt="Logo" />
+          <span>MyApp</span>
+        </Link>
+      </header>
 
-        {/* Footer nhỏ */}
-        <div className={styles.authFooter}>
-          <p>© {new Date().getFullYear()} MyApp. All rights reserved.</p>
+      {/* Main Content */}
+      <main className={styles.authContent}>
+        <div className={styles.authContainer}>
+          {children}
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className={styles.authFooter}>
+        <p>© {new Date().getFullYear()} MyApp. All rights reserved.</p>
+      </footer>
     </div>
   );
 };

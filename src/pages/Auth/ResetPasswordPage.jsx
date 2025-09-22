@@ -23,37 +23,40 @@ function ResetPasswordPage() {
   };
 
   return (
-    <div className={styles.authWrapper}>
-      <form className={styles.authForm} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Đặt lại mật khẩu</h2>
+    <form className={styles.authForm} onSubmit={handleSubmit}>
+      <h2 className={styles.title}>Đặt lại mật khẩu</h2>
+      <p style={{ color: "rgba(255, 255, 255, 0.7)", textAlign: "center", marginBottom: "1.5rem" }}>
+        Nhập mật khẩu mới để hoàn tất việc đặt lại
+      </p>
 
-        <PasswordInput
-          id="newPassword"
-          name="newPassword"
-          label="Mật khẩu mới"
-          value={formData.newPassword}
-          onChange={handleChange}
-          required
-        />
+      <PasswordInput
+        id="newPassword"
+        name="newPassword"
+        label="Mật khẩu mới"
+        value={formData.newPassword}
+        onChange={handleChange}
+        placeholder="Nhập mật khẩu mới"
+        required
+      />
 
-        <PasswordInput
-          id="confirmPassword"
-          name="confirmPassword"
-          label="Xác nhận mật khẩu mới"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-        />
+      <PasswordInput
+        id="confirmPassword"
+        name="confirmPassword"
+        label="Xác nhận mật khẩu mới"
+        value={formData.confirmPassword}
+        onChange={handleChange}
+        placeholder="Nhập lại mật khẩu mới"
+        required
+      />
 
-        <button type="submit" className={styles.submitBtn}>
-          Đặt lại mật khẩu
-        </button>
+      <button type="submit" className={styles.submitBtn}>
+        Đặt lại mật khẩu
+      </button>
 
-        <div className={styles.links}>
-          <Link to="/login">Quay lại đăng nhập</Link>
-        </div>
-      </form>
-    </div>
+      <div className={styles.links}>
+        <Link to="/login">Quay lại đăng nhập</Link>
+      </div>
+    </form>
   );
 }
 

@@ -24,61 +24,63 @@ function RegisterPage() {
   };
 
   return (
-    <div className={styles.authWrapper}>
-      <form className={styles.authForm} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Đăng ký</h2>
+    <form className={styles.authForm} onSubmit={handleSubmit}>
+      <h2 className={styles.title}>Đăng ký</h2>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="username">Tên đăng nhập</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <PasswordInput
-          id="password"
-          name="password"
-          label="Mật khẩu"
-          value={formData.password}
+      <div className={styles.formGroup}>
+        <label htmlFor="username">Tên đăng nhập</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          value={formData.username}
           onChange={handleChange}
+          placeholder="Nhập tên đăng nhập"
           required
         />
+      </div>
 
-        <PasswordInput
-          id="confirmPassword"
-          name="confirmPassword"
-          label="Xác nhận mật khẩu"
-          value={formData.confirmPassword}
+      <div className={styles.formGroup}>
+        <label htmlFor="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={formData.email}
           onChange={handleChange}
+          placeholder="Nhập email của bạn"
           required
         />
+      </div>
 
-        <button type="submit" className={styles.submitBtn}>
-          Đăng ký
-        </button>
+      <PasswordInput
+        id="password"
+        name="password"
+        label="Mật khẩu"
+        value={formData.password}
+        onChange={handleChange}
+        placeholder="Nhập mật khẩu"
+        required
+      />
 
-        <div className={styles.links}>
-          <Link to="/login">Đã có tài khoản? Đăng nhập</Link>
-        </div>
-      </form>
-    </div>
+      <PasswordInput
+        id="confirmPassword"
+        name="confirmPassword"
+        label="Xác nhận mật khẩu"
+        value={formData.confirmPassword}
+        onChange={handleChange}
+        placeholder="Nhập lại mật khẩu"
+        required
+      />
+
+      <button type="submit" className={styles.submitBtn}>
+        Đăng ký
+      </button>
+
+      <div className={styles.links}>
+        <Link to="/login">Đã có tài khoản? Đăng nhập</Link>
+      </div>
+    </form>
   );
 }
 

@@ -2,18 +2,38 @@ import { Routes, Route } from "react-router-dom";
 import publicRoutes from "./routes/publicRoutes";
 import privateRoutes from "./routes/privateRoutes";
 import PrivateRoute from "./components/PrivateRoute";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // debug
 import TokenDebug from "./debug/TokenDebug.jsx";
 
 function App() {
   return (
-    <>
+    <ErrorBoundary>
       <Routes>
         {/* Public routes */}
-        {publicRoutes.map(({ path, element }, index) => (
-          <Route key={`public-${index}`} path={path} element={element} />
-        ))}
+        {publicRoutes.map((route, index) => {
+          if (route.children) {
+            // Handle nested routes
+            return (
+              <Route key={`public-${index}`} path={route.path} element={route.element}>
+                {route.children.map((child, childIndex) => (
+                  <Route
+                    key={`public-${index}-${childIndex}`}
+                    index={child.index}
+                    path={child.path}
+                    element={child.element}
+                  />
+                ))}
+              </Route>
+            );
+          } else {
+            // Handle simple routes
+            return (
+              <Route key={`public-${index}`} path={route.path} element={route.element} />
+            );
+          }
+        })}
 
         {/* Private routes */}
         {privateRoutes.map(({ path, element }, index) => (
@@ -27,7 +47,7 @@ function App() {
 
       {/* Debug tool (dev only) */}
       {/* <TokenDebug /> */}
-    </>
+    </ErrorBoundary>
   );
 }
 

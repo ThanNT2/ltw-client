@@ -1,13 +1,14 @@
 // src/components/layout/Header/Header.jsx
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./Header.module.scss";
-import { Menu, LogOut, User, Settings } from "lucide-react";
+import { Menu, LogOut, User, Settings, LogIn, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectCurrentUser,
   selectIsAuthenticated,
 } from "../../../stores/selectors/userSelectors";
+import { logoutThunk } from "../../../stores/thunks/userThunks";
 
 const Header = ({ onMenuToggle }) => {
   const user = useSelector(selectCurrentUser);
@@ -31,7 +32,7 @@ const Header = ({ onMenuToggle }) => {
   const displayName = isAuthenticated && user ? getDisplayName(user) : "Khách";
   const truncatedName = getTruncatedName(displayName);
   // Coin
-  const coin = (isAuthenticated && user?.coin) ? user.coin : 0;
+  const coin = isAuthenticated && user?.coin ? user.coin : 0;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -41,18 +42,31 @@ const Header = ({ onMenuToggle }) => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   // Handle logout
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // Add logout logic here
-    console.log('Logout clicked');
+    try {
+      const result = await dispatch(logoutThunk());
+      if (logoutThunk.fulfilled.match(result)) {
+        navigate("/");
+      } else {
+        // toast.error(result.payload || "Lỗi đăng xuất");
+      }
+    } catch (error) {
+      // console.error("Logout error:", error);
+      // toast.error("Có lỗi xảy ra khi đăng xuất");
+    }
     setIsDropdownOpen(false);
   };
+
+  // Mock notification count - replace with real data
+  const notificationCount = isAuthenticated && user ? 0 : 0;
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
@@ -73,6 +87,18 @@ const Header = ({ onMenuToggle }) => {
         <div className={styles.userSection}>
           {isAuthenticated && user ? (
             <div className={styles.userDropdown} ref={dropdownRef}>
+              {/* Notification Icon */}
+              <div className={styles.notificationContainer}>
+                <button className={styles.notificationBtn}>
+                  <Bell size={24} />
+                  {notificationCount > 0 && (
+                    <span className={styles.notificationBadge}>
+                      {notificationCount > 99 ? '99+' : notificationCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+
               <div
                 className={styles.user}
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -86,12 +112,8 @@ const Header = ({ onMenuToggle }) => {
                   }}
                 />
                 <div className={styles.userInfo}>
-                  <div className={styles.name}>
-                    {truncatedName}
-                  </div>
-                  <div className={styles.coin}>
-                    {coin} 
-                  </div>
+                  <div className={styles.name}>{truncatedName}</div>
+                  <div className={styles.coin}>{coin}</div>
                 </div>
               </div>
 
@@ -108,9 +130,7 @@ const Header = ({ onMenuToggle }) => {
                       }}
                     />
                     <div className={styles.dropdownUserInfo}>
-                      <div className={styles.dropdownName}>
-                        {displayName}
-                      </div>
+                      <div className={styles.dropdownName}>{displayName}</div>
                       <div className={styles.dropdownEmail}>
                         {user.email || user.username}
                       </div>
@@ -151,7 +171,8 @@ const Header = ({ onMenuToggle }) => {
             </div>
           ) : (
             <Link to="/login" className={styles.loginBtn}>
-              Login
+              <LogIn size={16} />
+              <span>Login</span>
             </Link>
           )}
         </div>

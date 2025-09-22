@@ -22,42 +22,46 @@ function ChangePasswordPage() {
   };
 
   return (
-    <div className={styles.authWrapper}>
-      <form className={styles.authForm} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Đổi mật khẩu</h2>
+    <form className={styles.authForm} onSubmit={handleSubmit}>
+      <h2 className={styles.title}>Đổi mật khẩu</h2>
+      <p style={{ color: "rgba(255, 255, 255, 0.7)", textAlign: "center", marginBottom: "1.5rem" }}>
+        Thay đổi mật khẩu để bảo mật tài khoản của bạn
+      </p>
 
-        <PasswordInput
-          id="currentPassword"
-          name="currentPassword"
-          label="Mật khẩu hiện tại"
-          value={formData.currentPassword}
-          onChange={handleChange}
-          required
-        />
+      <PasswordInput
+        id="currentPassword"
+        name="currentPassword"
+        label="Mật khẩu hiện tại"
+        value={formData.currentPassword}
+        onChange={handleChange}
+        placeholder="Nhập mật khẩu hiện tại"
+        required
+      />
 
-        <PasswordInput
-          id="newPassword"
-          name="newPassword"
-          label="Mật khẩu mới"
-          value={formData.newPassword}
-          onChange={handleChange}
-          required
-        />
+      <PasswordInput
+        id="newPassword"
+        name="newPassword"
+        label="Mật khẩu mới"
+        value={formData.newPassword}
+        onChange={handleChange}
+        placeholder="Nhập mật khẩu mới"
+        required
+      />
 
-        <PasswordInput
-          id="confirmPassword"
-          name="confirmPassword"
-          label="Xác nhận mật khẩu mới"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-        />
+      <PasswordInput
+        id="confirmPassword"
+        name="confirmPassword"
+        label="Xác nhận mật khẩu mới"
+        value={formData.confirmPassword}
+        onChange={handleChange}
+        placeholder="Nhập lại mật khẩu mới"
+        required
+      />
 
-        <button type="submit" className={styles.submitBtn}>
-          Đổi mật khẩu
-        </button>
-      </form>
-    </div>
+      <button type="submit" className={styles.submitBtn}>
+        Đổi mật khẩu
+      </button>
+    </form>
   );
 }
 

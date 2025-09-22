@@ -1,30 +1,35 @@
 import MainLayout from "../layouts/MainLayout/MainLayout";
 import AuthLayout from "../layouts/AuthLayout/AuthLayout";
 
-import Header from "../components/layout/Header/Header";
-import Footer from "../components/layout/Footer/Footer";
-import Sidebar from "../components/layout/Sidebar/MainSidebar";
-
 // Pages
 import HomePage from "../pages/Home/HomePage";
+import Dashboard from "../pages/Dashboard/DashboardPage";
+import NotFoundPage from "../pages/Errors/NotFoundPage";
 import LoginPage from "../pages/Auth/LoginPage";
 import RegisterPage from "../pages/Auth/RegisterPage";
 import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/Auth/ResetPasswordPage";
 
 const publicRoutes = [
-  // Home → bọc trong MainLayout
+  // MainLayout with nested routes
   {
     path: "/",
-    element: (
-      <MainLayout
-        header={<Header />}
-        sidebar={<Sidebar />}
-        footer={<Footer />}
-      >
-        <HomePage />
-      </MainLayout>
-    ),
+    element: <MainLayout />,
+    children: [
+      {
+        index: true,
+        element: <HomePage />,
+      },
+      {
+        path: "dashboard",
+        element: <Dashboard />,
+      },
+      // Add more nested routes here as needed
+      // {
+      //   path: "profile",
+      //   element: <ProfilePage />,
+      // },
+    ],
   },
 
   // Auth pages → bọc trong AuthLayout
@@ -59,6 +64,12 @@ const publicRoutes = [
         <ResetPasswordPage />
       </AuthLayout>
     ),
+  },
+
+  // 404 Not Found - Catch all route
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ];
 

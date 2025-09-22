@@ -1,0 +1,33 @@
+.userLayout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: $white;
+
+  .main {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    flex: 1;
+
+    @include respond-to(md) {
+      grid-template-columns: 1fr; // Ẩn sidebar trên mobile
+    }
+  }
+
+  .content {
+    padding: 1rem;
+    overflow-y: auto;
+  }
+
+  .overlay {
+    display: none;
+
+    @include respond-to(md) {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+  }
+}

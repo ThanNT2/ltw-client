@@ -29,9 +29,9 @@ const Sidebar = () => {
   const menuItems = [
     {
       key: 'dashboard',
-      label: 'Dashboard',
+      label: 'Home',
       icon: Home,
-      href: '/dashboard'
+      href: '/'
     },
     {
       key: 'analytics',
@@ -99,7 +99,7 @@ const Sidebar = () => {
       key: 'notifications',
       label: 'Notifications',
       icon: Bell,
-      href: '/notifications'
+      href: '/Dashboard'
     },
     {
       key: 'help',
