@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import styles from "../../pages/Auth/Auth.module.scss";
 
-function PasswordInput({ id, name, label, value, onChange, required = false }) {
+function PasswordInput({ id, name, label, value, onChange, required = false, buttonColor }) {
   const [show, setShow] = useState(false);
 
   return (
@@ -21,6 +21,7 @@ function PasswordInput({ id, name, label, value, onChange, required = false }) {
         <button
           type="button"
           className={styles.showPasswordBtn}
+          style={buttonColor ? { color: buttonColor } : undefined}
           onClick={() => setShow((prev) => !prev)}
         >
           {show ? <EyeOff size={18} /> : <Eye size={18} />}

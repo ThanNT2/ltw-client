@@ -65,11 +65,12 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.6rem 0.9rem;
+  padding: 0.75rem 1rem;
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   border-radius: 6px;
   transition: background 0.2s ease;
+  font-size: 14px; // Align with MainSidebar item size
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
@@ -82,5 +83,61 @@
 
   .icon {
     flex-shrink: 0;
+  }
+}
+
+// Parent menu (no background, subtle color)
+.parentItem {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+
+  &:hover {
+    background: transparent;
+  }
+}
+
+// Submenu container and items (match MainSidebar spacing/size)
+.submenu {
+  margin-left: 1.5rem;
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding-left: 1rem;
+}
+
+.submenuItem {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 13px; // Align with MainSidebar submenu size
+  font-weight: 400;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  position: relative;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  &.active {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
   }
 }
