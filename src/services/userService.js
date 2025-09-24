@@ -42,7 +42,7 @@ const userService = {
   // Đổi mật khẩu
   changePassword: async (data) => {
     const response = await axiosInstance.post(`${API_URL}/change-password`, data);
-    return response.data; // { message: "Password changed successfully" }
+    return response.data; // { success, message, data: { accessToken } }
   },
 
   // Quên mật khẩu
@@ -59,7 +59,7 @@ const userService = {
       `${API_URL}/reset-password/${token}`,
       data
     );
-    return response.data; // { message: "Password reset successfully" }
+    return response.data; // { success, message }
   },
 };
 

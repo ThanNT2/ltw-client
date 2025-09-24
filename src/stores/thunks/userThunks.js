@@ -58,7 +58,7 @@ export const changePasswordThunk = createAsyncThunk(
   "user/changePassword",
   async (data, { rejectWithValue }) => {
     try {
-      return await userService.changePassword(data); // { message }
+      return await userService.changePassword(data); // { success, message, data: { accessToken } }
     } catch (err) {
       return rejectWithValue(
         err.response?.data || { message: "Change password failed" }
@@ -86,7 +86,7 @@ export const resetPasswordThunk = createAsyncThunk(
   "user/resetPassword",
   async ({ token, data }, { rejectWithValue }) => {
     try {
-      return await userService.resetPassword(token, data); // { message }
+      return await userService.resetPassword(token, data); // { success, message }
     } catch (err) {
       return rejectWithValue(
         err.response?.data || { message: "Reset password failed" }

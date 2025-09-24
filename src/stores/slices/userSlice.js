@@ -4,6 +4,9 @@ import {
   loginThunk,
   refreshTokenThunk,
   logoutThunk,
+  changePasswordThunk,
+  forgotPasswordThunk,
+  resetPasswordThunk,
 } from "../thunks/userThunks";
 
 const initialState = {
@@ -68,6 +71,55 @@ const userSlice = createSlice({
         // vẫn clear luôn cho chắc chắn
         state.currentUser = null;
         state.accessToken = null;
+      })
+      // 🔹 Change password → nhận accessToken mới
+      .addCase(changePasswordThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(changePasswordThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        const newToken = action.payload?.data?.accessToken;
+        if (newToken) {
+          state.accessToken = newToken;
+          state.isAuthenticated = true;
+        }
+      })
+      .addCase(changePasswordThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Đổi mật khẩu thất bại";
+      })
+
+      // 🔹 Forgot password
+      .addCase(forgotPasswordThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(forgotPasswordThunk.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(forgotPasswordThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Yêu cầu quên mật khẩu thất bại";
+      })
+
+      // 🔹 Reset password
+      .addCase(resetPasswordThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetPasswordThunk.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+        // Không tự đăng nhập; người dùng sẽ đăng nhập lại thủ công
+        state.isAuthenticated = false;
+        state.accessToken = null;
+      })
+      .addCase(resetPasswordThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Đặt lại mật khẩu thất bại";
       });
   },
 });

@@ -1,25 +1,28 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { forgotPasswordThunk } from "../../stores/thunks/userThunks";
 import styles from "./Auth.module.scss";
 
 const ForgotPasswordPage = () => {
+  const dispatch = useDispatch();
+  const loading = useSelector((state) => state.user.loading);
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setMessage("");
 
     try {
-      // TODO: Gọi API gửi email reset password
-      console.log("Reset password for:", email);
-      setMessage("Đã gửi liên kết đặt lại mật khẩu đến email của bạn!");
+      const action = await dispatch(forgotPasswordThunk(email));
+      if (action.meta.requestStatus === "fulfilled") {
+        setMessage("Đã gửi liên kết đặt lại mật khẩu đến email của bạn!");
+      } else {
+        setMessage(action.payload?.message || "Có lỗi xảy ra, vui lòng thử lại!");
+      }
     } catch (error) {
       setMessage("Có lỗi xảy ra, vui lòng thử lại!");
-    } finally {
-      setLoading(false);
     }
   };
 

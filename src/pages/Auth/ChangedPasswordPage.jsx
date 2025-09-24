@@ -1,10 +1,14 @@
 // src/pages/Auth/ChangePasswordPage.jsx
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { changePasswordThunk } from "../../stores/thunks/userThunks";
 import authStyles from "./Auth.module.scss";
 import styles from "./ChangedPasswordPage.module.scss";
 import PasswordInput from "../../components/common/PasswordInput";
 
 function ChangePasswordPage() {
+  const dispatch = useDispatch();
+  const loading = useSelector((state) => state.user.loading);
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -12,6 +16,7 @@ function ChangePasswordPage() {
   });
 
   const [errors, setErrors] = useState({});
+  const [successMsg, setSuccessMsg] = useState("");
   const isValid =
     formData.currentPassword &&
     formData.newPassword &&
@@ -37,11 +42,32 @@ function ChangePasswordPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    console.log("Change password data:", formData);
-    // TODO: gọi API change password
+    setSuccessMsg("");
+    try {
+      const action = await dispatch(
+        changePasswordThunk({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+        })
+      );
+      if (action.meta.requestStatus === "fulfilled") {
+        setSuccessMsg("Đổi mật khẩu thành công");
+        setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          submit: action.payload?.message || "Đổi mật khẩu thất bại",
+        }));
+      }
+    } catch (err) {
+      setErrors((prev) => ({
+        ...prev,
+        submit: err?.message || "Đổi mật khẩu thất bại",
+      }));
+    }
   };
 
   return (
@@ -51,6 +77,8 @@ function ChangePasswordPage() {
         <p className={styles.subtitle}>Thay đổi mật khẩu để bảo mật tài khoản của bạn</p>
 
         <form className={`${authStyles.authForm} ${styles.lightForm} ${styles.form}`} onSubmit={handleSubmit}>
+          {successMsg && <div className={styles.successText}>{successMsg}</div>}
+          {errors.submit && <div className={styles.errorText}>{errors.submit}</div>}
           <div className={styles.row}>
             <div className={styles.label}>Mật khẩu hiện tại</div>
             <div className={styles.control}>
@@ -111,7 +139,7 @@ function ChangePasswordPage() {
               Hủy
             </button>
             <div className={styles.actions}>
-              <button type="submit" disabled={!isValid} className={`${authStyles.submitBtn} ${styles.primaryButton}`}>
+              <button type="submit" disabled={!isValid || loading} className={`${authStyles.submitBtn} ${styles.primaryButton}`}>
                 Xác nhận
               </button>
             </div>
