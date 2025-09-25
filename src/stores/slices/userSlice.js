@@ -2,11 +2,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   loginThunk,
+  registerThunk,
   refreshTokenThunk,
   logoutThunk,
   changePasswordThunk,
   forgotPasswordThunk,
   resetPasswordThunk,
+  getProfileThunk,
+  updateProfileThunk,
 } from "../thunks/userThunks";
 
 const initialState = {
@@ -41,6 +44,24 @@ const userSlice = createSlice({
       .addCase(loginThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Đăng nhập thất bại";
+        state.isAuthenticated = false;
+      })
+
+      // 🔹 Register (xử lý tương tự login)
+      .addCase(registerThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.accessToken = action.payload.data?.accessToken;
+        state.currentUser = action.payload.data?.safeUser || null;
+        state.error = null;
+      })
+      .addCase(registerThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Đăng ký thất bại";
         state.isAuthenticated = false;
       })
 
@@ -120,6 +141,28 @@ const userSlice = createSlice({
       .addCase(resetPasswordThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Đặt lại mật khẩu thất bại";
+      })
+
+      // 🔹 Get profile → đồng bộ user
+      .addCase(getProfileThunk.fulfilled, (state, action) => {
+        state.currentUser = action.payload?.data || state.currentUser;
+        state.isAuthenticated = true;
+      })
+
+      // 🔹 Update profile → cập nhật user (kể cả avatar)
+      .addCase(updateProfileThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfileThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        const updatedUser = action.payload?.data?.user;
+        if (updatedUser) state.currentUser = updatedUser;
+      })
+      .addCase(updateProfileThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Cập nhật thông tin thất bại";
       });
   },
 });

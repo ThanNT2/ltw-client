@@ -14,6 +14,18 @@ export const loginThunk = createAsyncThunk(
   }
 );
 
+// Đăng ký
+export const registerThunk = createAsyncThunk(
+  "user/register",
+  async (payload, { rejectWithValue }) => {
+    try {
+      return await userService.register(payload); // { success, message, data: { safeUser, accessToken } }
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: "Register failed" });
+    }
+  }
+);
+
 // Refresh token
 export const refreshTokenThunk = createAsyncThunk(
   "user/refreshToken",
@@ -48,6 +60,20 @@ export const getProfileThunk = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(
         err.response?.data || { message: "Get profile failed" }
+      );
+    }
+  }
+);
+
+// Cập nhật hồ sơ (bao gồm avatar)
+export const updateProfileThunk = createAsyncThunk(
+  "user/updateProfile",
+  async (payload, { rejectWithValue }) => {
+    try {
+      return await userService.updateProfile(payload); // { success, message, data: { user } }
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Update profile failed" }
       );
     }
   }
