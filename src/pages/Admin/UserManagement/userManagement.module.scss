@@ -1,0 +1,512 @@
+@use "sass:color";
+/* Variables */
+$table-border: 1px solid #e0e0e0;
+$primary: #007bff;
+$danger: #dc3545;
+$success: #28a745;
+$warning: #ffc107;
+$info: #17a2b8;
+$gray: #6c757d;
+$light-bg: #f1f3f5;
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.cardList {
+  display: none;
+}
+
+.exportWrapper {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.exportButton {
+  padding: 8px 16px;
+  font-size: 14px;
+  border: 1px solid $primary;
+  background: white;
+  color: $primary;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: $primary;
+    color: white;
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: $gray;
+  font-size: 16px;
+}
+
+.empty {
+  text-align: center;
+  padding: 20px;
+  color: $gray;
+  font-size: 16px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+
+  th,
+  td {
+    padding: 8px 12px;
+    border: $table-border;
+    text-align: center;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  th {
+    background-color: $light-bg;
+    font-weight: bold;
+    
+    &.roleCol {
+      min-width: 120px;
+      max-width: 180px;
+    }
+    
+    &:nth-child(1) { // Avatar
+      width: 80px;
+      min-width: 80px;
+    }
+    
+    &:nth-child(2) { // Email
+      min-width: 200px;
+    }
+    
+    &:nth-child(3) { // Name
+      min-width: 150px;
+    }
+    
+    &:nth-child(4) { // Phone
+      min-width: 120px;
+    }
+    
+    &:nth-child(5) { // Coin
+      width: 100px;
+      min-width: 100px;
+    }
+    
+    &:nth-child(7), // Created
+    &:nth-child(8), // Updated
+    &:nth-child(9) { // Last Login
+      min-width: 120px;
+    }
+    
+    &:nth-child(10), // Status
+    &:nth-child(11) { // Deleted
+      width: 100px;
+      min-width: 100px;
+    }
+    
+    &:nth-child(12) { // Actions
+      width: 150px;
+      min-width: 150px;
+    }
+  }
+
+  .avatarWrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .statusDot {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 10px;
+    height: 10px;
+    border: 2px solid white;
+    border-radius: 50%;
+  }
+
+  .online {
+    background-color: $success;
+  }
+
+  .offline {
+    background-color: $gray;
+  }
+
+  .role {
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+
+  .roleCell {
+    min-width: 100px;
+  }
+
+  .role {
+    width: 100%;
+    min-width: 100px;
+  }
+
+  .admin {
+    background: rgba($primary, 0.1);
+    color: $primary;
+  }
+
+  .moderator {
+    background: rgba($warning, 0.1);
+    color: $warning;
+  }
+
+  .user {
+    background: rgba($success, 0.1);
+    color: $success;
+  }
+
+  .active {
+    color: $success;
+  }
+
+  .blocked {
+    color: $danger;
+  }
+
+  .deleted {
+    color: $danger;
+  }
+
+  .normal {
+    color: $success;
+  }
+
+  .edit,
+  .delete,
+  .restore {
+    padding: 4px 8px;
+    margin: 0 2px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-color: #ccc !important;
+      color: #666 !important;
+    }
+  }
+
+  .edit {
+    background-color: $info;
+    color: white;
+
+    &:hover {
+      background-color: color.scale($info, $lightness: -10%);
+    }
+  }
+
+  .delete {
+    background-color: $danger;
+    color: white;
+
+    &:hover {
+      background-color: color.scale($danger, $lightness: -10%);
+    }
+  }
+
+  .restore {
+    background-color: $success;
+    color: white;
+
+    &:hover {
+      background-color: color.scale($success, $lightness: -10%);
+    }
+  }
+}
+
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 12px 16px;
+  background: #f9f9fb;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+
+  .pageControls {
+    display: flex;
+    gap: 6px;
+
+    button {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 12px;
+      border: none;
+      background: $primary;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background: color.scale($primary, $lightness: -8%);
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+      }
+
+      &:disabled {
+        background: #ccc;
+        color: #eee;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+    }
+
+    span {
+      font-weight: 600;
+      color: $gray;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .limitSelectWrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    select {
+      padding: 6px 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+      transition: border 0.2s ease;
+
+      &:hover {
+        border-color: $primary;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .table {
+    display: none;
+  }
+
+  .cardList {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .card {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background: #fff;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .cardHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .cardTitle {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .cardName {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cardEmail {
+    font-size: 11px;
+    color: #6b7280;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cardIndex {
+    color: #6b7280;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .avatarWrapper {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .statusDot {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 8px;
+    height: 8px;
+    border: 1px solid white;
+    border-radius: 50%;
+  }
+
+  .cardBody {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .fieldGroup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  /* Ensure role select doesn't overflow on mobile */
+  .role {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 13px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .fieldLabel {
+    font-size: 13px;
+    color: #6b7280;
+    letter-spacing: 0.2px;
+    font-weight: 600;
+  }
+
+  .fieldValue {
+    font-size: 14px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-left: auto;
+  }
+
+  .actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .edit,
+  .delete,
+  .restore {
+    padding: 6px 10px;
+    font-size: 12px;
+    min-width: 60px;
+  }
+
+  .pagination {
+    flex-direction: column;
+    align-items: stretch;
+
+    .pageControls {
+      justify-content: center;
+    }
+
+    .limitSelectWrapper {
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 10px;
+  }
+
+  .cardHeader {
+    gap: 8px;
+  }
+
+  .avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .statusDot {
+    width: 6px;
+    height: 6px;
+    right: -1px;
+    bottom: -1px;
+  }
+
+  .fieldGroup {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .role {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  .fieldLabel { font-size: 14px; }
+  .fieldValue { font-size: 15px; }
+  .actions { justify-content: center; }
+  .edit, .delete, .restore { flex: 1; min-width: 0; }
+}
+

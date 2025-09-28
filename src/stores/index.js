@@ -3,6 +3,7 @@ import { configureStore,combineReducers  } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // lưu vào localStorage
 import userReducer from "./slices/userSlice";
+import userManagementReducer from "./slices/userManagementSlice";
 
 // Cấu hình persist
 const persistConfig = {
@@ -15,6 +16,7 @@ const persistConfig = {
 // Combine reducers (sau này có nhiều slice thì gom lại ở đây)
 const rootReducer = combineReducers({
   user: userReducer,
+  userManagement: userManagementReducer,
 });
 
 // Tạo persistedReducer

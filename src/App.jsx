@@ -1,6 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import publicRoutes from "./routes/publicRoutes";
-import privateRoutes from "./routes/privateRoutes";
+import { publicRoutes, privateRoutes } from "./routes";
 import PrivateRoute from "./components/PrivateRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 

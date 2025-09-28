@@ -1,0 +1,20 @@
+// src/stores/thunks/userManagementThunks.js
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import userManagementService from "../../services/userManagement";
+
+// Lấy danh sách người dùng (Admin)
+export const getAllUsersByAdminThunk = createAsyncThunk(
+  "userManagement/getAllUsersByAdmin",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const res = await userManagementService.getAllUsersByAdmin(params);
+      return res; // { success, message, data }
+    } catch (err) {
+      return rejectWithValue(
+        err?.response?.data || { message: "Fetch users by admin failed" }
+      );
+    }
+  }
+);
+
+

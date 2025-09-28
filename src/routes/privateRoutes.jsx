@@ -1,6 +1,7 @@
 import ChangePasswordPage from "../pages/Auth/ChangedPasswordPage";
 import UserProfilePage from "../pages/User/Profile/ProfilePage";
 import UserLayout from "../layouts/UserLayout/UserLayout";
+import UserManagement from "../pages/Admin/UserManagement/userManagement";
 
 const privateRoutes = [
   {
@@ -14,6 +15,10 @@ const privateRoutes = [
       {
         path: "change-password",
         element: <ChangePasswordPage />,
+      },
+      {
+        path: "admin/users",
+        element: <UserManagement />,
       },
     ],
   },

@@ -11,7 +11,13 @@ export default defineConfig({
       strict: false,
     },
     // 👇 thêm fallback
-    proxy: {},
-    historyApiFallback: true
+      proxy: {
+    '/api': {
+      target: 'http://192.168.1.107:9000', // API backend
+      changeOrigin: true,
+    },
+  },
+    historyApiFallback: true,
+    host: true, 
   }
 });

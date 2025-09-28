@@ -61,7 +61,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
         {open.dashboard && (
           <div className={styles.submenu}>
             <NavLink
-              to="/dashboard/users"
+              to="/admin/users"
               className={({ isActive }) => `${styles.submenuItem} ${isActive ? styles.active : ""}`}
               onClick={onClose}
             >
