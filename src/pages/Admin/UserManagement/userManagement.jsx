@@ -2,13 +2,13 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import {
-getAllUsersByAdminThunk,
+  getAllUsersByAdminThunk,
+  softDeleteUserByAdminThunk,
 } from "../../../stores/thunks/userManagementThunks";
 import {
-selectUserList,
-selectUserPagination,
-selectUserManagementLoading,
-selectUserManagementError,
+  selectUserList,
+  selectUserPagination,
+  selectUserManagementLoading,
 } from "../../../stores/selectors/userManagementSelectors";
 import { selectCurrentUser } from "../../../stores/selectors/userSelectors";
 import { setPagination } from "../../../stores/slices/userManagementSlice";
@@ -20,8 +20,6 @@ import UserTable from "../UserTable/UserTable";
 const API_BASE_URL = (import.meta && import.meta.env && import.meta.env.VITE_API_BASE_URL) || "http://localhost:9000/api";
 const SERVER_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
-const ROLES = ["admin", "moderator", "user"];
-
 // Export helper function
 const exportUserData = (data, type, filename) => {
   if (!data || data.length === 0) return;
@@ -32,7 +30,7 @@ const exportUserData = (data, type, filename) => {
     case "csv":
       const csvContent = [
         "Email,Fullname,Phone,Coin,Role,CreatedAt,LastLogin,Status",
-        ...data.map(user => 
+        ...data.map(user =>
           `"${user.email}","${user.fullname}","${user.phone}","${user.coin}","${user.role}","${user.createdAt}","${user.lastLogin}","${user.status}"`
         )
       ].join("\n");
@@ -44,7 +42,7 @@ const exportUserData = (data, type, filename) => {
       // For Excel, we'll create a simple CSV that can be opened in Excel
       const excelContent = [
         "Email,Fullname,Phone,Coin,Role,CreatedAt,LastLogin,Status",
-        ...data.map(user => 
+        ...data.map(user =>
           `"${user.email}","${user.fullname}","${user.phone}","${user.coin}","${user.role}","${user.createdAt}","${user.lastLogin}","${user.status}"`
         )
       ].join("\n");
@@ -72,216 +70,21 @@ const exportUserData = (data, type, filename) => {
   window.URL.revokeObjectURL(url);
 };
 
-/** --- Sub Components --- */
-
-const UserTableRow = ({ user, index, onEditUser, onChangeRole, onSoftDeleteUser, onRestoreUser }) => {
-  const roleLabel = user.role || "user";
-  const roleClass = styles[roleLabel] || styles.user;
-  const onlineClass = user.onlineStatus === "online" ? styles.online : styles.offline;
-
-  return (
-    <tr key={user._id || user.id}>
-      <td data-label="Avatar">
-        <div className={styles.avatarWrapper}>
-          <img
-            src={
-              user.avatar
-                ? `${SERVER_BASE_URL}${user.avatar}`
-                : `${SERVER_BASE_URL}/uploads/avatars/default-avatar.png`
-            }
-            alt="avatar"
-            className={styles.avatar}
-          />
-          <span className={`${styles.statusDot} ${onlineClass}`}></span>
-        </div>
-      </td>
-      <td data-label="Email">{user.email}</td>
-      <td data-label="Họ & tên">{user.username || user.name || "—"}</td>
-      <td data-label="Điện thoại">{user.phone || "—"}</td>
-      <td data-label="Coin">
-        {user.coin?.toLocaleString("vi-VN") || "0"}
-      </td>
-      <td data-label="Phân quyền">
-        <div className={styles.roleCell}>
-          <select
-            value={roleLabel}
-            onChange={(e) => onChangeRole?.(user._id || user.id, e.target.value)}
-            className={`${styles.role} ${roleClass}`}
-            disabled={user.isDeleted}
-          >
-            {ROLES.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-        </div>
-      </td>
-      <td data-label="Ngày tạo">
-        {user.createdAt ? new Date(user.createdAt).toLocaleDateString("vi-VN") : "—"}
-      </td>
-      <td data-label="Cập nhật">
-        {user.updatedAt ? new Date(user.updatedAt).toLocaleDateString("vi-VN") : "—"}
-      </td>
-      <td data-label="Last Login">
-        {user.lastOnline
-          ? new Date(user.lastOnline).toLocaleString("vi-VN")
-          : "—"}
-      </td>
-      <td
-        data-label="Trạng thái"
-        className={user.isActive ? styles.active : styles.blocked}
-      >
-        {user.isActive ? "Hoạt động" : "Bị khóa"}
-      </td>
-      <td data-label="Đã xóa">
-        <span className={user.isDeleted ? styles.deleted : styles.normal}>
-          {user.isDeleted ? "Đã xóa" : "Bình thường"}
-        </span>
-      </td>
-      <td data-label="Thao tác">
-        {!user.isDeleted ? (
-          <>
-            <button
-              className={styles.edit}
-              onClick={() => onEditUser?.(user)}
-            >
-              Sửa
-            </button>
-            <button
-              className={styles.delete}
-              onClick={() => onSoftDeleteUser?.(user._id || user.id)}
-            >
-              Xóa
-            </button>
-          </>
-        ) : (
-          <button
-            className={styles.restore}
-            onClick={() => onRestoreUser?.(user._id || user.id)}
-          >
-            Khôi phục
-          </button>
-        )}
-      </td>
-    </tr>
-  );
-};
-
-// Mobile-first card for small screens
-const UserCard = ({ user, index, onEditUser, onChangeRole, onSoftDeleteUser, onRestoreUser }) => {
-  const roleLabel = user.role || "user";
-  const roleClass = styles[roleLabel] || styles.user;
-  const onlineClass = user.onlineStatus === "online" ? styles.online : styles.offline;
-
-  return (
-    <div className={styles.card} aria-label="User card">
-      <div className={styles.cardHeader}>
-        <div className={styles.avatarWrapper} aria-hidden="true">
-          <img
-            src={
-              user.avatar
-                ? `${SERVER_BASE_URL}${user.avatar}`
-                : `${SERVER_BASE_URL}/uploads/avatars/default-avatar.png`
-            }
-            alt="avatar"
-            className={styles.avatar}
-          />
-          <span className={`${styles.statusDot} ${onlineClass}`}></span>
-        </div>
-        <div className={styles.cardTitle}>
-          <div className={styles.cardName}>{user.username || user.name || "—"}</div>
-          <div className={styles.cardEmail}>{user.email || "—"}</div>
-        </div>
-        <div className={styles.cardIndex}>#{index}</div>
-      </div>
-
-      <div className={styles.cardBody}>
-        <div className={styles.fieldGroup}>
-          <div className={styles.field}>
-            <span className={styles.fieldLabel}>Điện thoại</span>
-            <span className={styles.fieldValue}>{user.phone || "—"}</span>
-          </div>
-          <div className={styles.field}>
-            <span className={styles.fieldLabel}>Coin</span>
-            <span className={styles.fieldValue}>{user.coin?.toLocaleString("vi-VN") || "0"}</span>
-          </div>
-        </div>
-
-        <div className={styles.fieldGroup}>
-          <div className={styles.field}>
-            <span className={styles.fieldLabel}>Phân quyền</span>
-            <select
-              value={roleLabel}
-              onChange={(e) => onChangeRole?.(user._id || user.id, e.target.value)}
-              className={`${styles.role} ${roleClass}`}
-              disabled={user.isDeleted}
-              aria-label="Change role"
-            >
-              {ROLES.map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
-          </div>
-          <div className={styles.field}>
-            <span className={styles.fieldLabel}>Trạng thái</span>
-            <span className={user.isActive ? styles.active : styles.blocked}>
-              {user.isActive ? "Hoạt động" : "Bị khóa"}
-            </span>
-          </div>
-        </div>
-
-        <div className={styles.fieldGroup}>
-          <div className={styles.field}>
-            <span className={styles.fieldLabel}>Ngày tạo</span>
-            <span className={styles.fieldValue}>
-              {user.createdAt ? new Date(user.createdAt).toLocaleDateString("vi-VN") : "—"}
-            </span>
-          </div>
-          <div className={styles.field}>
-            <span className={styles.fieldLabel}>Cập nhật</span>
-            <span className={styles.fieldValue}>
-              {user.updatedAt ? new Date(user.updatedAt).toLocaleDateString("vi-VN") : "—"}
-            </span>
-          </div>
-        </div>
-
-        <div className={styles.field}>
-          <span className={styles.fieldLabel}>Last Login</span>
-          <span className={styles.fieldValue}>
-            {user.lastOnline ? new Date(user.lastOnline).toLocaleString("vi-VN") : "—"}
-          </span>
-        </div>
-
-        <div className={styles.actions}>
-          {!user.isDeleted ? (
-            <>
-              <button className={styles.edit} onClick={() => onEditUser?.(user)}>Sửa</button>
-              <button className={styles.delete} onClick={() => onSoftDeleteUser?.(user._id || user.id)}>Xóa</button>
-            </>
-          ) : (
-            <button className={styles.restore} onClick={() => onRestoreUser?.(user._id || user.id)}>Khôi phục</button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
 /** --- Main Component --- */
 const UserManagement = ({
   onEditUser,
   onChangeRole,
-  onSoftDeleteUser,
   onRestoreUser,
 }) => {
   const dispatch = useDispatch();
+  const handleSoftDeleteUser = (userId) => {
+    if (!userId) return;
+    dispatch(softDeleteUserByAdminThunk(userId));
+  };
 
   const users = useSelector(selectUserList);
   const pagination = useSelector(selectUserPagination);
   const loading = useSelector(selectUserManagementLoading);
-  const error = useSelector(selectUserManagementError);
   const currentUser = useSelector(selectCurrentUser);
 
   const { page, limit } = pagination;
@@ -289,9 +92,9 @@ const UserManagement = ({
   const totalUsers = pagination.total || 0;
   const currentUserRole = currentUser?.role || "user";
 
-  const [filters, setFilters] = React.useState({ 
-    keyword: "", 
-    role: "all", 
+  const [filters, setFilters] = React.useState({
+    keyword: "",
+    role: "all",
     status: "all",
     search: "",
     isDeleted: "undefined",
@@ -345,7 +148,7 @@ const UserManagement = ({
 
     // Set filtering state
     setIsFiltering(true);
-    
+
     dispatch(getAllUsersByAdminThunk(queryParams))
       .finally(() => {
         setIsFiltering(false);
@@ -382,9 +185,9 @@ const UserManagement = ({
   };
 
   const handleResetFilters = () => {
-    setFilters({ 
-      keyword: "", 
-      role: "all", 
+    setFilters({
+      keyword: "",
+      role: "all",
       status: "all",
       search: "",
       isDeleted: "undefined",
@@ -406,7 +209,7 @@ const UserManagement = ({
 
   return (
     <div className={styles.tableWrapper}>
-      <UserFilter 
+      <UserFilter
         search={filters.search}
         role={filters.role}
         isDeleted={filters.isDeleted}
@@ -445,7 +248,7 @@ const UserManagement = ({
         onLimitChange={handleLimitChange}
         onEditUser={onEditUser}
         onChangeRole={onChangeRole}
-        onSoftDeleteUser={onSoftDeleteUser}
+        onSoftDeleteUser={handleSoftDeleteUser}
         onRestoreUser={onRestoreUser}
       />
     </div>
@@ -455,7 +258,6 @@ const UserManagement = ({
 UserManagement.propTypes = {
   onEditUser: PropTypes.func,
   onChangeRole: PropTypes.func,
-  onSoftDeleteUser: PropTypes.func,
   onRestoreUser: PropTypes.func,
 };
 

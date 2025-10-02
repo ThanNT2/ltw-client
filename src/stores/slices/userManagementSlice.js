@@ -1,6 +1,6 @@
 // src/stores/slices/userManagementSlice.js
 import { createSlice } from "@reduxjs/toolkit";
-import { getAllUsersByAdminThunk } from "../thunks/userManagementThunks";
+import { getAllUsersByAdminThunk, updateUserByAdminThunk, softDeleteUserByAdminThunk } from "../thunks/userManagementThunks";
 
 const initialState = {
   list: [],
@@ -53,7 +53,7 @@ const userManagementSlice = createSlice({
         const { items, pagination } = payload;
 
         state.list = Array.isArray(items) ? items : [];
-        
+
         if (pagination) {
           state.pagination.page = pagination.page ?? state.pagination.page;
           state.pagination.limit = pagination.limit ?? state.pagination.limit;
@@ -64,7 +64,33 @@ const userManagementSlice = createSlice({
       .addCase(getAllUsersByAdminThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error?.message || "Tải danh sách người dùng thất bại";
-      });
+      })
+      // update user by Admin
+      .addCase(updateUserByAdminThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateUserByAdminThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(updateUserByAdminThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error?.message || "Cập nhật người dùng thất bại";
+      })
+      //xóa mềm users by admin
+      .addCase(softDeleteUserByAdminThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(softDeleteUserByAdminThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(softDeleteUserByAdminThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error?.message || "Xóa mềm người dùng thất bại";
+      })
   },
 });
 

@@ -18,3 +18,32 @@ export const getAllUsersByAdminThunk = createAsyncThunk(
 );
 
 
+// Cập nhật thông tin người dùng (Admin)
+export const updateUserByAdminThunk = createAsyncThunk(
+  "userManagement/updateUserByAdmin",
+  async ({ userId, payload, file }, { rejectWithValue }) => {
+    try {
+      const res = await userManagementService.updateUserByAdmin(userId, payload, file);
+      return res; // { success, message, data }
+    } catch (err) {
+      return rejectWithValue(
+        err?.response?.data || { message: "Update user by admin failed" }
+      );
+    }
+  }
+);
+
+// Xóa người dùng (Admin) - soft delete
+export const softDeleteUserByAdminThunk = createAsyncThunk(
+  "userManagement/softDeleteUserByAdmin",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const res = await userManagementService.deleteUserByAdmin(userId);
+      return res; // { success, message, data }
+    } catch (err) {
+      return rejectWithValue(
+        err?.response?.data || { message: "Soft delete user by admin failed" }
+      );
+    }
+  }
+);

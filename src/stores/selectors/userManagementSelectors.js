@@ -7,4 +7,11 @@ export const selectUserFilters = (state) => state.userManagement.filters;
 export const selectUserManagementLoading = (state) => state.userManagement.loading;
 export const selectUserManagementError = (state) => state.userManagement.error;
 
+// selector for updateUserByAdminThunk
+export const selectUpdatedUser = (state) => state.userManagement.updatedUser;
+
+//selector for deleteUserByAdminThunk
+export const selectDeletedUser = (state) => state.userManagement.deletedUser;
+
+
 

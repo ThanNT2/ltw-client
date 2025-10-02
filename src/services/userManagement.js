@@ -32,6 +32,30 @@ const userManagementService = {
     const response = await axiosInstance.get(ADMIN_API_URL, { params });
     return response.data; // { success, message, data }
   },
+  //cập nhật thông tin users by Admin
+  updateUserByAdmin: async (userId, payload = {}, file = null) => {
+    const formData = new FormData();
+    for (const key in payload) {
+      formData.append(key, payload[key]);
+    }
+    if (file) {
+      formData.append("avatar", file);
+    }
+    const response = await axiosInstance.put(`${ADMIN_API_URL}/${userId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    });
+    return response.data; // { success, message, data }
+  },
+  //xóa mềm users by Admin
+  deleteUserByAdmin: async (userId) => {
+    const response = await axiosInstance.delete(`${ADMIN_API_URL}/${userId}`, {
+      withCredentials: true,
+    });
+    return response.data; // { success, message, data }
+  },
 };
 
 export default userManagementService;
