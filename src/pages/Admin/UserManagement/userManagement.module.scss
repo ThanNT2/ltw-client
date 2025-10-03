@@ -499,10 +499,60 @@ $light-bg: #f1f3f5;
     gap: 6px;
   }
 
-  .role {
-    font-size: 12px;
-    padding: 6px 8px;
+/* Role Badge */
+.role {
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 13px;
+
+  &.admin {
+    background: rgba($primary, 0.1);
+    color: $primary;
   }
+
+  &.moderator {
+    background: rgba($warning, 0.1);
+    color: $warning;
+  }
+
+  &.user {
+    background: rgba($success, 0.1);
+    color: $success;
+  }
+}
+
+/* Status Badge */
+.status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+  min-width: 80px;
+
+  &--active {
+    background: rgba($success, 0.1);
+    color: $success;
+  }
+
+  &--blocked {
+    background: rgba($danger, 0.1);
+    color: $danger;
+  }
+
+  &--deleted {
+    background: rgba($danger, 0.1);
+    color: $danger;
+  }
+
+  &--normal {
+    background: rgba($info, 0.1);
+    color: $info;
+  }
+}
+
 
   .fieldLabel { font-size: 14px; }
   .fieldValue { font-size: 15px; }

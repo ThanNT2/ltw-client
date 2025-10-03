@@ -1,6 +1,6 @@
 // src/stores/slices/userManagementSlice.js
 import { createSlice } from "@reduxjs/toolkit";
-import { getAllUsersByAdminThunk, updateUserByAdminThunk, softDeleteUserByAdminThunk } from "../thunks/userManagementThunks";
+import { getAllUsersByAdminThunk, updateUserByAdminThunk, softDeleteUserByAdminThunk, restoreUserByAdminThunk } from "../thunks/userManagementThunks";
 
 const initialState = {
   list: [],
@@ -73,6 +73,19 @@ const userManagementSlice = createSlice({
       .addCase(updateUserByAdminThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
+        // User từ API (nếu có)
+        const updatedUser = action.payload?.data;
+
+        // ID lấy từ payload hoặc fallback từ meta.arg
+        const updatedId = updatedUser?._id || updatedUser?.id || action.meta.arg?.id;
+
+        state.list = state.list.map((u) =>
+          u._id === updatedId || u.id === updatedId
+            ? updatedUser
+              ? { ...u, ...updatedUser } // ✅ merge theo API trả về
+              : { ...u, ...action.meta.arg?.data } // ✅ fallback merge theo dữ liệu client gửi
+            : u
+        );
       })
       .addCase(updateUserByAdminThunk.rejected, (state, action) => {
         state.loading = false;
@@ -86,11 +99,54 @@ const userManagementSlice = createSlice({
       .addCase(softDeleteUserByAdminThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
+        // Nếu API có trả về user (đầy đủ fields)
+        const updatedUser = action.payload?.data;
+
+        // Lấy ID từ payload hoặc fallback về arg
+        const deletedId = updatedUser?._id || updatedUser?.id || action.meta.arg;
+
+        state.list = state.list.map((u) =>
+          u._id === deletedId || u.id === deletedId
+            ? updatedUser
+              // ✅ Trường hợp API trả user -> merge để đồng bộ chính xác
+              ? { ...u, ...updatedUser }
+              // ✅ Trường hợp API chỉ trả success=true -> update thủ công
+              : { ...u, isDeleted: true, isActive: false }
+            : u
+        );
       })
       .addCase(softDeleteUserByAdminThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error?.message || "Xóa mềm người dùng thất bại";
       })
+      //khoi phuc users by admin
+      .addCase(restoreUserByAdminThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(restoreUserByAdminThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        // Nếu API có trả về user (đầy đủ fields)
+        const restoredUser = action.payload?.data;
+
+        // Lấy ID từ payload hoặc fallback từ arg
+        const restoredId = restoredUser?._id || restoredUser?.id || action.meta.arg;
+
+        state.list = state.list.map((u) =>
+          u._id === restoredId || u.id === restoredId
+            ? restoredUser
+              // ✅ Nếu có user từ API → merge để không mất field
+              ? { ...u, ...restoredUser }
+              // ✅ Nếu API chỉ trả success=true → fallback thủ công
+              : { ...u, isDeleted: false, isActive: true }
+            : u
+        );
+      })
+      .addCase(restoreUserByAdminThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error?.message || "Khoi phuc người dùng thất bại";
+      });
   },
 });
 

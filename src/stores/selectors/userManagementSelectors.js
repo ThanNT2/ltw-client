@@ -13,5 +13,8 @@ export const selectUpdatedUser = (state) => state.userManagement.updatedUser;
 //selector for deleteUserByAdminThunk
 export const selectDeletedUser = (state) => state.userManagement.deletedUser;
 
+//selector for restoreUserByAdminThunk
+export const selectRestoredUser = (state) => state.userManagement.restoredUser;
+
 
 

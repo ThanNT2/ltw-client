@@ -6,6 +6,10 @@ import { refreshTokenThunk, logoutThunk } from "../stores/thunks/userThunks";
 const axiosInstance = axios.create({
   baseURL: "http://localhost:9000/api", // có thể đổi sang process.env.REACT_APP_API_URL
   withCredentials: true, // gửi kèm cookie refreshToken (HttpOnly)
+    headers: {
+    "Cache-Control": "no-cache",
+    Pragma: "no-cache",
+  },
 });
 
 // 🟢 Request interceptor

@@ -56,6 +56,14 @@ const userManagementService = {
     });
     return response.data; // { success, message, data }
   },
+
+  //restore mềm users by Admin
+  restoreUserByAdmin: async (userId) => {
+    const response = await axiosInstance.put(`${ADMIN_API_URL}/${userId}/restore`, {}, {
+      withCredentials: true,
+    });
+    return response.data; // { success, message, data }
+  },
 };
 
 export default userManagementService;

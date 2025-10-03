@@ -47,3 +47,17 @@ export const softDeleteUserByAdminThunk = createAsyncThunk(
     }
   }
 );
+//restore người dùng (Admin)
+export const restoreUserByAdminThunk = createAsyncThunk(
+  "userManagement/restoreUserByAdmin",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const res = await userManagementService.restoreUserByAdmin(userId);
+      return res; // { success, message, data }
+    } catch (err) {
+      return rejectWithValue(
+        err?.response?.data || { message: "Restore user by admin failed" }
+      );
+    }
+  }
+);

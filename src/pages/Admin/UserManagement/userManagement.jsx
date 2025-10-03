@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import {
   getAllUsersByAdminThunk,
   softDeleteUserByAdminThunk,
+  restoreUserByAdminThunk
 } from "../../../stores/thunks/userManagementThunks";
 import {
   selectUserList,
@@ -74,12 +75,17 @@ const exportUserData = (data, type, filename) => {
 const UserManagement = ({
   onEditUser,
   onChangeRole,
-  onRestoreUser,
+  onRestoreUser
 }) => {
   const dispatch = useDispatch();
   const handleSoftDeleteUser = (userId) => {
     if (!userId) return;
     dispatch(softDeleteUserByAdminThunk(userId));
+  };
+
+  const handleRestoreUser = (userId) => {
+    if (!userId) return;
+    dispatch(restoreUserByAdminThunk(userId));
   };
 
   const users = useSelector(selectUserList);
@@ -249,7 +255,7 @@ const UserManagement = ({
         onEditUser={onEditUser}
         onChangeRole={onChangeRole}
         onSoftDeleteUser={handleSoftDeleteUser}
-        onRestoreUser={onRestoreUser}
+        onRestoreUser={handleRestoreUser}
       />
     </div>
   );
