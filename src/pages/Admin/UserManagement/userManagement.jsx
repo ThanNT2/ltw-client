@@ -4,7 +4,9 @@ import PropTypes from "prop-types";
 import {
   getAllUsersByAdminThunk,
   softDeleteUserByAdminThunk,
-  restoreUserByAdminThunk
+  restoreUserByAdminThunk,
+  updateUserByAdminThunk,
+
 } from "../../../stores/thunks/userManagementThunks";
 import {
   selectUserList,
@@ -78,6 +80,11 @@ const UserManagement = ({
   onRestoreUser
 }) => {
   const dispatch = useDispatch();
+  const handleChangeRole = (userId, newRole, oldRole) => {
+    console.log(userId, newRole, oldRole);
+    if (!userId || newRole === oldRole) return; // chỉ bỏ qua nếu không có thay đổi
+    dispatch(updateUserByAdminThunk({ userId, payload: { role: newRole } }));
+  }
   const handleSoftDeleteUser = (userId) => {
     if (!userId) return;
     dispatch(softDeleteUserByAdminThunk(userId));
@@ -253,7 +260,7 @@ const UserManagement = ({
         onPageChange={handlePageChange}
         onLimitChange={handleLimitChange}
         onEditUser={onEditUser}
-        onChangeRole={onChangeRole}
+        onChangeRole={handleChangeRole}
         onSoftDeleteUser={handleSoftDeleteUser}
         onRestoreUser={handleRestoreUser}
       />

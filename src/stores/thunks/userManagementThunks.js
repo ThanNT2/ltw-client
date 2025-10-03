@@ -22,6 +22,7 @@ export const getAllUsersByAdminThunk = createAsyncThunk(
 export const updateUserByAdminThunk = createAsyncThunk(
   "userManagement/updateUserByAdmin",
   async ({ userId, payload, file }, { rejectWithValue }) => {
+    console.log(userId, payload, file);
     try {
       const res = await userManagementService.updateUserByAdmin(userId, payload, file);
       return res; // { success, message, data }

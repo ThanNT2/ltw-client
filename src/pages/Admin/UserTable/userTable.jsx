@@ -30,7 +30,7 @@ const UserTableRow = ({ user, index, serverBaseUrl, currentUserRole, onEditUser,
         <div className={styles.roleCell}>
           <select
             value={roleLabel}
-            onChange={(e) => onChangeRole?.(user._id || user.id, e.target.value)}
+            onChange={(e) => onChangeRole?.(user._id || user.id, e.target.value, user.role)}
             className={`${styles.role} ${styles[roleLabel] || styles.user}`}
             disabled={!canModify}
           >
@@ -50,15 +50,15 @@ const UserTableRow = ({ user, index, serverBaseUrl, currentUserRole, onEditUser,
       <td data-label="Thao tác">
         {!user.isDeleted ? (
           <>
-            <button 
-              className={styles.edit} 
+            <button
+              className={styles.edit}
               onClick={() => onEditUser?.(user)}
               disabled={!isAdmin}
             >
               Sửa
             </button>
-            <button 
-              className={styles.delete} 
+            <button
+              className={styles.delete}
               onClick={() => onSoftDeleteUser?.(user._id || user.id)}
               disabled={!isAdmin}
             >
@@ -66,8 +66,8 @@ const UserTableRow = ({ user, index, serverBaseUrl, currentUserRole, onEditUser,
             </button>
           </>
         ) : (
-          <button 
-            className={styles.restore} 
+          <button
+            className={styles.restore}
             onClick={() => onRestoreUser?.(user._id || user.id)}
             disabled={!isAdmin}
           >
@@ -118,7 +118,7 @@ const UserCard = ({ user, index, serverBaseUrl, currentUserRole, onEditUser, onC
             <span className={styles.fieldLabel}>Phân quyền</span>
             <select
               value={roleLabel}
-              onChange={(e) => onChangeRole?.(user._id || user.id, e.target.value)}
+              onChange={(e) => onChangeRole?.(user._id || user.id, e.target.value, user.role)}
               className={`${styles.role} ${styles[roleLabel] || styles.user}`}
               disabled={!canModify}
             >
@@ -149,15 +149,15 @@ const UserCard = ({ user, index, serverBaseUrl, currentUserRole, onEditUser, onC
         <div className={styles.actions}>
           {!user.isDeleted ? (
             <>
-              <button 
-                className={styles.edit} 
+              <button
+                className={styles.edit}
                 onClick={() => onEditUser?.(user)}
                 disabled={!isAdmin}
               >
                 Sửa
               </button>
-              <button 
-                className={styles.delete} 
+              <button
+                className={styles.delete}
                 onClick={() => onSoftDeleteUser?.(user._id || user.id)}
                 disabled={!isAdmin}
               >
@@ -165,8 +165,8 @@ const UserCard = ({ user, index, serverBaseUrl, currentUserRole, onEditUser, onC
               </button>
             </>
           ) : (
-            <button 
-              className={styles.restore} 
+            <button
+              className={styles.restore}
               onClick={() => onRestoreUser?.(user._id || user.id)}
               disabled={!isAdmin}
             >
@@ -275,5 +275,4 @@ UserTable.propTypes = {
 };
 
 export default UserTable;
-
 
