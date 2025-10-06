@@ -1,5 +1,5 @@
 // src/layouts/UserLayout/UserLayout.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "../../components/layout/Header/Header";
 import Footer from "../../components/layout/Footer/Footer";
@@ -8,9 +8,22 @@ import styles from "./UserLayout.module.scss";
 
 const UserLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // 🔹 Lấy thông tin người dùng từ localStorage khi load layout
+  useEffect(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Lỗi khi parse currentUser:", error);
+      }
+    }
+  }, []);
 
   const handleToggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+    setSidebarOpen((prev) => !prev);
   };
 
   return (
@@ -28,7 +41,12 @@ const UserLayout = () => {
           />
         )}
 
-        <UserSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        {/* ✅ Truyền currentUser sang Sidebar */}
+        <UserSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          currentUser={currentUser}
+        />
 
         <div className={styles.content}>
           <Outlet /> {/* ✅ render page con */}

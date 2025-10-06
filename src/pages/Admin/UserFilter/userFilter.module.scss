@@ -6,6 +6,8 @@
   background: #f9fbfe;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .row {
@@ -13,8 +15,10 @@
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+  justify-content: space-between;
 }
 
+/* === Bộ lọc chung === */
 .searchBox,
 .roleBox,
 .deletedBox,
@@ -24,8 +28,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1;
+  flex: 1 1 200px;
   min-width: 180px;
+
+  label {
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
+    white-space: nowrap;
+  }
 
   input,
   select {
@@ -34,19 +45,23 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
-  }
+    background: #fff;
+    transition: border-color 0.2s ease;
 
-  label {
-    font-weight: 500;
-    font-size: 14px;
-    white-space: nowrap;
+    &:focus {
+      border-color: #007bff;
+      outline: none;
+    }
   }
 }
 
+/* === Icon search === */
 .iconLeft {
   color: #007bff;
+  font-size: 14px;
 }
 
+/* === Sort button === */
 .sortBtn {
   background: #007bff;
   color: white;
@@ -56,12 +71,20 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.1s ease;
 
   &:hover {
     background: #0056b3;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
+/* === Reset button === */
 .resetBtn {
   background: #6c757d;
   color: white;
@@ -71,16 +94,112 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  font-size: 14px;
+  transition: background 0.2s ease, transform 0.1s ease;
 
   &:hover {
     background: #495057;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
-@media (max-width: 768px) {
+/* === Responsive === */
+
+/* Tablet: bố trí 2 cột gọn, full width, font to hơn chút */
+@media (max-width: 992px) {
+  .row {
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start;
+  }
+
+  .searchBox,
+  .roleBox,
+  .deletedBox,
+  .dateBox,
+  .sortBox,
+  .onlineBox {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 200px;
+  }
+
+  .resetBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Mobile: 1 cột, spacing đều, dễ bấm */
+@media (max-width: 600px) {
+  .filterContainer {
+    padding: 12px;
+    border-radius: 6px;
+    gap: 10px;
+  }
+
   .row {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
+  }
+
+  .searchBox,
+  .roleBox,
+  .deletedBox,
+  .dateBox,
+  .sortBox,
+  .onlineBox {
+    flex: 1 1 100%;
+    flex-direction: column;
+    align-items: stretch;
+
+    label {
+      font-size: 13px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      font-size: 13px;
+    }
+  }
+
+  .sortBtn,
+  .resetBtn {
+    width: 100%;
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+/* Rất nhỏ (điện thoại mini): nới khoảng cách để không chạm nhầm */
+@media (max-width: 400px) {
+  .filterContainer {
+    padding: 10px;
+  }
+
+  .row {
+    gap: 8px;
+  }
+
+  label {
+    font-size: 12.5px;
+  }
+
+  input,
+  select {
+    font-size: 12.5px;
+  }
+
+  .sortBtn,
+  .resetBtn {
+    padding: 8px;
+    font-size: 12.5px;
   }
 }

@@ -6,7 +6,6 @@ import {
   softDeleteUserByAdminThunk,
   restoreUserByAdminThunk,
   updateUserByAdminThunk,
-
 } from "../../../stores/thunks/userManagementThunks";
 import {
   selectUserList,
@@ -17,47 +16,60 @@ import { selectCurrentUser } from "../../../stores/selectors/userSelectors";
 import { setPagination } from "../../../stores/slices/userManagementSlice";
 import styles from "./userManagement.module.scss";
 import UserFilter from "../UserFilter/UserFilter";
-import UserTable from "../UserTable/UserTable";
+import UserTable from "../UserTable/userTable";
 import UserModal from "../Modal/userUpdateModal";
 
-// Resolve server/base URLs in Vite
-const API_BASE_URL = (import.meta && import.meta.env && import.meta.env.VITE_API_BASE_URL) || "http://localhost:9000/api";
+/** --- ENV setup --- */
+const API_BASE_URL =
+  (import.meta?.env?.VITE_API_BASE_URL) || "http://localhost:9000/api";
 const SERVER_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
-// Export helper function
+/** --- Export helper --- */
 const exportUserData = (data, type, filename) => {
-  if (!data || data.length === 0) return;
+  if (!data?.length) return;
+  let content, mimeType, ext;
 
-  let content, mimeType, fileExtension;
+  const headers = [
+    "Email",
+    "Fullname",
+    "Phone",
+    "Coin",
+    "Role",
+    "CreatedAt",
+    "LastLogin",
+    "Status",
+  ];
+  const csvRows = data.map((u) =>
+    [
+      u.email,
+      u.fullname || "—",
+      u.phone || "—",
+      u.coin || 0,
+      u.role,
+      u.createdAt,
+      u.lastLogin,
+      u.status,
+    ]
+      .map((v) => `"${v}"`)
+      .join(",")
+  );
+  const joined = [headers.join(","), ...csvRows].join("\n");
 
   switch (type) {
     case "csv":
-      const csvContent = [
-        "Email,Fullname,Phone,Coin,Role,CreatedAt,LastLogin,Status",
-        ...data.map(user =>
-          `"${user.email}","${user.fullname}","${user.phone}","${user.coin}","${user.role}","${user.createdAt}","${user.lastLogin}","${user.status}"`
-        )
-      ].join("\n");
-      content = csvContent;
+      content = joined;
       mimeType = "text/csv";
-      fileExtension = "csv";
+      ext = "csv";
       break;
     case "excel":
-      // For Excel, we'll create a simple CSV that can be opened in Excel
-      const excelContent = [
-        "Email,Fullname,Phone,Coin,Role,CreatedAt,LastLogin,Status",
-        ...data.map(user =>
-          `"${user.email}","${user.fullname}","${user.phone}","${user.coin}","${user.role}","${user.createdAt}","${user.lastLogin}","${user.status}"`
-        )
-      ].join("\n");
-      content = excelContent;
+      content = joined;
       mimeType = "text/csv";
-      fileExtension = "xlsx";
+      ext = "xlsx";
       break;
     case "json":
       content = JSON.stringify(data, null, 2);
       mimeType = "application/json";
-      fileExtension = "json";
+      ext = "json";
       break;
     default:
       return;
@@ -67,47 +79,86 @@ const exportUserData = (data, type, filename) => {
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${filename}.${fileExtension}`;
+  link.download = `${filename}.${ext}`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
 };
 
-/** --- Main Component --- */
-const UserManagement = ({
-  onEditUser,
-  onChangeRole,
-  onRestoreUser
-}) => {
+/** --- Component --- */
+const UserManagement = () => {
   const dispatch = useDispatch();
+  const users = useSelector(selectUserList);
+  const pagination = useSelector(selectUserPagination);
+  const loading = useSelector(selectUserManagementLoading);
+  const currentUser = useSelector(selectCurrentUser);
+
+  const { page, limit, total } = pagination;
+  const totalPages = Math.ceil((total || 0) / limit);
+  const totalUsers = total || 0;
+  const currentUserRole = currentUser?.role || "user";
+
+  const [filters, setFilters] = useState({
+    search: "",
+    role: "all",
+    isDeleted: "undefined",
+    sortField: "createdAt",
+    sortOrder: "desc",
+    fromDate: "",
+    toDate: "",
+    onlineStatus: "all",
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isFiltering, setIsFiltering] = useState(false);
 
+  /** --- Fetch users --- */
+  useEffect(() => {
+    const query = {
+      page,
+      limit,
+      ...(filters.search && { search: filters.search }),
+      ...(filters.role !== "all" && { role: filters.role }),
+      ...(filters.isDeleted !== "undefined" && {
+        isDeleted: filters.isDeleted === "true",
+      }),
+      ...(filters.onlineStatus !== "all" && {
+        onlineStatus: filters.onlineStatus,
+      }),
+      ...(filters.fromDate && { fromDate: filters.fromDate }),
+      ...(filters.toDate && { toDate: filters.toDate }),
+      sort: `${filters.sortField}:${filters.sortOrder}`,
+    };
+
+    setIsFiltering(true);
+    dispatch(getAllUsersByAdminThunk(query)).finally(() =>
+      setIsFiltering(false)
+    );
+  }, [dispatch, page, limit, filters]);
+
+  /** --- Handlers --- */
   const handleChangeRole = (userId, newRole, oldRole) => {
-    console.log(userId, newRole, oldRole);
-    if (!userId || newRole === oldRole) return; // chỉ bỏ qua nếu không có thay đổi
+    if (!userId || newRole === oldRole) return;
     dispatch(updateUserByAdminThunk({ userId, payload: { role: newRole } }));
-  }
-  const handleSoftDeleteUser = (userId) => {
-    if (!userId) return;
-    dispatch(softDeleteUserByAdminThunk(userId));
   };
 
-  const handleRestoreUser = (userId) => {
-    if (!userId) return;
-    dispatch(restoreUserByAdminThunk(userId));
+  const handleSoftDelete = (userId) => {
+    if (userId) dispatch(softDeleteUserByAdminThunk(userId));
+  };
+  const handleRestore = (userId) => {
+    if (userId) dispatch(restoreUserByAdminThunk(userId));
   };
 
-  const handleEditUser = (userId) => {
-    console.log(userId);
-    if (!userId) return;
-    setSelectedUser(userId);
+  const handleEdit = (user) => {
+    setSelectedUser(user);
     setIsModalOpen(true);
   };
-  const handleSaveUser = async (updatedUser) => {
-    if (!updatedUser) return;
-    dispatch(updateUserByAdminThunk({ userId: updatedUser._id, payload: updatedUser }));
+  const handleSave = (updated) => {
+    if (updated?._id)
+      dispatch(
+        updateUserByAdminThunk({ userId: updated._id, payload: updated })
+      );
     setIsModalOpen(false);
     setSelectedUser(null);
   };
@@ -116,133 +167,55 @@ const UserManagement = ({
     setSelectedUser(null);
   };
 
-  const users = useSelector(selectUserList);
-  const pagination = useSelector(selectUserPagination);
-  const loading = useSelector(selectUserManagementLoading);
-  const currentUser = useSelector(selectCurrentUser);
-
-  const { page, limit } = pagination;
-  const totalPages = Math.ceil((pagination.total || 0) / limit);
-  const totalUsers = pagination.total || 0;
-  const currentUserRole = currentUser?.role || "user";
-
-  const [filters, setFilters] = React.useState({
-    keyword: "",
-    role: "all",
-    status: "all",
-    search: "",
-    isDeleted: "undefined",
-    sortField: "createdAt",
-    sortOrder: "desc",
-    fromDate: "",
-    toDate: "",
-    onlineStatus: "all"
-  });
-  const [isFiltering, setIsFiltering] = React.useState(false);
-
-  useEffect(() => {
-    // Build query parameters from filters
-    const queryParams = {
-      page,
-      limit,
-    };
-
-    // Add search filter
-    if (filters.search && filters.search.trim()) {
-      queryParams.search = filters.search.trim();
-    }
-
-    // Add role filter
-    if (filters.role && filters.role !== "all") {
-      queryParams.role = filters.role;
-    }
-
-    // Add deleted status filter
-    if (filters.isDeleted !== "undefined") {
-      queryParams.isDeleted = filters.isDeleted === "true";
-    }
-
-    // Add online status filter
-    if (filters.onlineStatus && filters.onlineStatus !== "all") {
-      queryParams.onlineStatus = filters.onlineStatus;
-    }
-
-    // Add date range filters
-    if (filters.fromDate) {
-      queryParams.fromDate = filters.fromDate;
-    }
-    if (filters.toDate) {
-      queryParams.toDate = filters.toDate;
-    }
-
-    // Add sort parameters
-    if (filters.sortField) {
-      queryParams.sort = `${filters.sortField}:${filters.sortOrder}`;
-    }
-
-    // Set filtering state
-    setIsFiltering(true);
-
-    dispatch(getAllUsersByAdminThunk(queryParams))
-      .finally(() => {
-        setIsFiltering(false);
-      });
-  }, [dispatch, page, limit, filters]);
-
-  const handlePageChange = (nextPage) => {
-    if (nextPage < 1 || nextPage > totalPages) return;
-    dispatch(setPagination({ page: nextPage }));
+  const handlePageChange = (p) => {
+    if (p < 1 || p > totalPages) return;
+    dispatch(setPagination({ page: p }));
   };
 
   const handleLimitChange = (newLimit) => {
-    const limitValue = Number(newLimit) || 10;
-    dispatch(setPagination({ limit: limitValue, page: 1 }));
+    dispatch(setPagination({ limit: Number(newLimit) || 10, page: 1 }));
   };
 
-  const handleExport = (type) => {
-    if (!users || users.length === 0) return;
-
-    const data = users.map((u) => ({
-      email: u.email,
-      fullname: u.username || u.name || "—",
-      phone: u.phone || "—",
-      coin: u.coin || 0,
-      role: u.role || "user",
-      createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString("vi-VN") : "—",
-      lastLogin: u.lastOnline
-        ? new Date(u.lastOnline).toLocaleString("vi-VN")
-        : "—",
-      status: u.isActive ? "Hoạt động" : "Bị khóa",
-    }));
-
-    exportUserData(data, type, "users_export");
+  const handleFilterChange = (name, value) => {
+    setFilters((prev) => ({ ...prev, [name]: value }));
+    dispatch(setPagination({ page: 1 }));
   };
 
   const handleResetFilters = () => {
     setFilters({
-      keyword: "",
-      role: "all",
-      status: "all",
       search: "",
+      role: "all",
       isDeleted: "undefined",
       sortField: "createdAt",
       sortOrder: "desc",
       fromDate: "",
       toDate: "",
-      onlineStatus: "all"
+      onlineStatus: "all",
     });
-    // Reset to page 1 when filters are reset
     dispatch(setPagination({ page: 1 }));
   };
 
-  const handleFilterChange = (filterName, value) => {
-    setFilters(prev => ({ ...prev, [filterName]: value }));
-    // Reset to page 1 when filters change
-    dispatch(setPagination({ page: 1 }));
+  const handleExport = (type) => {
+    if (!users?.length) return;
+    const formatted = users.map((u) => ({
+      email: u.email,
+      fullname: u.username || u.name || "—",
+      phone: u.phone || "—",
+      coin: u.coin || 0,
+      role: u.role || "user",
+      createdAt: u.createdAt
+        ? new Date(u.createdAt).toLocaleDateString("vi-VN")
+        : "—",
+      lastLogin: u.lastOnline
+        ? new Date(u.lastOnline).toLocaleString("vi-VN")
+        : "—",
+      status: u.isActive ? "Hoạt động" : "Bị khóa",
+    }));
+    exportUserData(formatted, type, "users_export");
   };
 
   return (
-    <div className={styles.tableWrapper}>
+    <div className={styles.container}>
       <UserFilter
         search={filters.search}
         role={filters.role}
@@ -252,48 +225,62 @@ const UserManagement = ({
         fromDate={filters.fromDate}
         toDate={filters.toDate}
         onlineStatus={filters.onlineStatus}
-        onSearchChange={(value) => handleFilterChange('search', value)}
-        onRoleChange={(value) => handleFilterChange('role', value)}
-        onIncludeDeletedChange={(value) => handleFilterChange('isDeleted', value)}
-        onSortFieldChange={(value) => handleFilterChange('sortField', value)}
-        onSortOrderToggle={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
-        onFromDateChange={(value) => handleFilterChange('fromDate', value)}
-        onToDateChange={(value) => handleFilterChange('toDate', value)}
-        onOnlineStatusChange={(value) => handleFilterChange('onlineStatus', value)}
+        onSearchChange={(v) => handleFilterChange("search", v)}
+        onRoleChange={(v) => handleFilterChange("role", v)}
+        onIncludeDeletedChange={(v) => handleFilterChange("isDeleted", v)}
+        onSortFieldChange={(v) => handleFilterChange("sortField", v)}
+        onSortOrderToggle={() =>
+          handleFilterChange(
+            "sortOrder",
+            filters.sortOrder === "asc" ? "desc" : "asc"
+          )
+        }
+        onFromDateChange={(v) => handleFilterChange("fromDate", v)}
+        onToDateChange={(v) => handleFilterChange("toDate", v)}
+        onOnlineStatusChange={(v) => handleFilterChange("onlineStatus", v)}
         onResetFilters={handleResetFilters}
       />
 
       <div className={styles.exportWrapper}>
-        <button onClick={() => handleExport("csv")} className={styles.exportButton}>Export CSV</button>
-        <button onClick={() => handleExport("excel")} className={styles.exportButton}>Export Excel</button>
-        <button onClick={() => handleExport("json")} className={styles.exportButton}>Export JSON</button>
+        <button onClick={() => handleExport("csv")} className={styles.exportButton}>
+          Export CSV
+        </button>
+        <button onClick={() => handleExport("excel")} className={styles.exportButton}>
+          Export Excel
+        </button>
+        <button onClick={() => handleExport("json")} className={styles.exportButton}>
+          Export JSON
+        </button>
       </div>
 
-      <UserTable
-        users={users}
-        loading={loading || isFiltering}
-        page={page}
-        totalPages={totalPages}
-        totalUsers={totalUsers}
-        limit={limit}
-        serverBaseUrl={SERVER_BASE_URL}
-        currentUserRole={currentUserRole}
-        onPageChange={handlePageChange}
-        onLimitChange={handleLimitChange}
-        onEditUser={handleEditUser}
-        onChangeRole={handleChangeRole}
-        onSoftDeleteUser={handleSoftDeleteUser}
-        onRestoreUser={handleRestoreUser}
-      />
+      <div className={styles.tableContainer}>
+        <UserTable
+          users={users}
+          loading={loading || isFiltering}
+          page={page}
+          totalPages={totalPages}
+          totalUsers={totalUsers}
+          limit={limit}
+          serverBaseUrl={SERVER_BASE_URL}
+          currentUserRole={currentUserRole}
+          currentUserId={currentUser?.id}
+          onPageChange={handlePageChange}
+          onLimitChange={handleLimitChange}
+          onEditUser={handleEdit}
+          onChangeRole={handleChangeRole}
+          onSoftDeleteUser={handleSoftDelete}
+          onRestoreUser={handleRestore}
+        />
+      </div>
 
-      {isModalOpen && !!selectedUser &&
+      {isModalOpen && selectedUser && (
         <UserModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           userData={selectedUser}
-          onSave={handleSaveUser}
-        />}
-
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 };

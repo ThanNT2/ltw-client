@@ -2,10 +2,10 @@ import React, { useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../../stores/selectors/userSelectors";
-import styles from "./userModal.module.scss";
+import styles from "./userUpdateModal.module.scss";
 import { getChangedFields } from "../../../utils/getChangedFields";
 
-const UserModal = ({ isOpen, onClose, userData, onSave }) => {
+const UserUpdateModal = ({ isOpen, onClose, userData, onSave }) => {
     const [formData, setFormData] = useState(null);
     const [loading, setLoading] = useState(false);
     const initialized = useRef(false);
@@ -32,8 +32,8 @@ const UserModal = ({ isOpen, onClose, userData, onSave }) => {
                 removeAvatar: false,
             });
 
-            console.log("✅ Modal mounted once for user:", userData.username);
             initialized.current = true;
+            console.log("✅ Modal initialized for:", userData.username);
         }
 
         if (!isOpen) {
@@ -41,10 +41,9 @@ const UserModal = ({ isOpen, onClose, userData, onSave }) => {
         }
     }, [isOpen, userData]);
 
-    /** --- KHÔNG RENDER KHI CHƯA MỞ HOẶC CHƯA CÓ DỮ LIỆU --- */
     if (!isOpen || !formData) return null;
 
-    /** --- CÁC HÀM XỬ LÝ FORM --- */
+    /** --- HANDLE INPUT CHANGE --- */
     const handleChange = (e) => {
         const { name, value, type, checked, files } = e.target;
         if (name === "avatar" && files.length > 0) {
@@ -66,7 +65,7 @@ const UserModal = ({ isOpen, onClose, userData, onSave }) => {
     const handleRemoveAvatar = () => {
         setFormData((prev) => ({
             ...prev,
-            avatar: null,
+            avatar: "/uploads/avatars/default-avatar.png",
             avatarPreview: null,
             removeAvatar: true,
         }));
@@ -84,36 +83,40 @@ const UserModal = ({ isOpen, onClose, userData, onSave }) => {
         return true;
     };
 
+    /** --- CHỈ ADMIN ĐƯỢC CHỈNH ROLE (trừ chính mình) --- */
+    const isRoleEditable =
+        currentUser?.role === "admin" && currentUser?._id !== userData?._id;
+
+    /** --- SUBMIT FORM --- */
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
 
         setLoading(true);
+        const changedFields = getChangedFields(userData, formData);
+        console.log(changedFields);
+        // luôn đính kèm _id để backend biết user nào
+        changedFields._id = userData._id;
 
-        const updatedFields = {
-            _id: userData._id,
-            username: formData.username,
-            phone: formData.phone,
-            coin: formData.coin,
-            isActive: formData.isActive,
-            role: formData.role,
-        };
-
+        // avatar logic
         if (formData.avatar instanceof File) {
-            updatedFields.avatar = formData.avatar;
+            changedFields.avatar = formData.avatar;
         } else if (formData.removeAvatar) {
-            updatedFields.removeAvatar = true;
+            changedFields.removeAvatar = true;
         }
 
-        await onSave(updatedFields);
+        // Không có thay đổi → bỏ qua update
+        if (Object.keys(changedFields).length === 0) {
+            alert("Không có thay đổi nào để cập nhật.");
+            setLoading(false);
+            onClose();
+            return;
+        }
+
+        await onSave(changedFields);
         setLoading(false);
     };
 
-    /** --- CHỈ ADMIN ĐƯỢC PHÉP CHỈNH ROLE, NHƯNG KHÔNG ĐƯỢC CHỈNH ROLE CỦA CHÍNH MÌNH --- */
-    const isRoleEditable =
-        currentUser?.role === "admin" && currentUser?._id !== userData?._id;
-
-    /** --- JSX --- */
     return (
         <>
             <div className={styles.overlay} onClick={onClose}></div>
@@ -160,28 +163,22 @@ const UserModal = ({ isOpen, onClose, userData, onSave }) => {
                         />
                     </label>
 
-                    {/* --- Role: chỉ admin được chỉnh --- */}
                     <label>
                         Vai trò:
                         <select
                             name="role"
                             value={formData.role}
                             onChange={handleChange}
-                            className={styles.select}
                             disabled={!isRoleEditable}
-                            style={{
-                                backgroundColor: !isRoleEditable ? "#f3f3f3" : "white",
-                                cursor: !isRoleEditable ? "not-allowed" : "pointer",
-                            }}
+                            className={!isRoleEditable ? styles.disabledSelect : ""}
                         >
-                            <option value="user">user</option>
+                            <option value="user">User</option>
                             <option value="moderator">Moderator</option>
-                            <option value="admin">admin</option>
+                            <option value="admin">Admin</option>
                         </select>
                         {!isRoleEditable && (
                             <small className={styles.note}>
-                                Chỉ admin có thể chỉnh role, và không thể đổi role của chính
-                                mình
+                                Chỉ Admin có thể chỉnh role, không thể đổi role của chính mình
                             </small>
                         )}
                     </label>
@@ -243,11 +240,11 @@ const UserModal = ({ isOpen, onClose, userData, onSave }) => {
     );
 };
 
-UserModal.propTypes = {
+UserUpdateModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
     userData: PropTypes.object,
     onSave: PropTypes.func.isRequired,
 };
 
-export default UserModal;
+export default UserUpdateModal;
