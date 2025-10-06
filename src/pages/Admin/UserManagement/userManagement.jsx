@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import {
@@ -18,6 +18,7 @@ import { setPagination } from "../../../stores/slices/userManagementSlice";
 import styles from "./userManagement.module.scss";
 import UserFilter from "../UserFilter/UserFilter";
 import UserTable from "../UserTable/UserTable";
+import UserModal from "../Modal/userUpdateModal";
 
 // Resolve server/base URLs in Vite
 const API_BASE_URL = (import.meta && import.meta.env && import.meta.env.VITE_API_BASE_URL) || "http://localhost:9000/api";
@@ -80,6 +81,9 @@ const UserManagement = ({
   onRestoreUser
 }) => {
   const dispatch = useDispatch();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
   const handleChangeRole = (userId, newRole, oldRole) => {
     console.log(userId, newRole, oldRole);
     if (!userId || newRole === oldRole) return; // chỉ bỏ qua nếu không có thay đổi
@@ -93,6 +97,23 @@ const UserManagement = ({
   const handleRestoreUser = (userId) => {
     if (!userId) return;
     dispatch(restoreUserByAdminThunk(userId));
+  };
+
+  const handleEditUser = (userId) => {
+    console.log(userId);
+    if (!userId) return;
+    setSelectedUser(userId);
+    setIsModalOpen(true);
+  };
+  const handleSaveUser = async (updatedUser) => {
+    if (!updatedUser) return;
+    dispatch(updateUserByAdminThunk({ userId: updatedUser._id, payload: updatedUser }));
+    setIsModalOpen(false);
+    setSelectedUser(null);
+  };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedUser(null);
   };
 
   const users = useSelector(selectUserList);
@@ -259,11 +280,20 @@ const UserManagement = ({
         currentUserRole={currentUserRole}
         onPageChange={handlePageChange}
         onLimitChange={handleLimitChange}
-        onEditUser={onEditUser}
+        onEditUser={handleEditUser}
         onChangeRole={handleChangeRole}
         onSoftDeleteUser={handleSoftDeleteUser}
         onRestoreUser={handleRestoreUser}
       />
+
+      {isModalOpen && !!selectedUser &&
+        <UserModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          userData={selectedUser}
+          onSave={handleSaveUser}
+        />}
+
     </div>
   );
 };
