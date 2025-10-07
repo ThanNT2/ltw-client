@@ -25,6 +25,9 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     // có thể thêm reducers sync nếu cần
+    setCurrentUser: (state, action) => {
+      state.currentUser = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -37,7 +40,6 @@ const userSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.accessToken = action.payload.data.accessToken;
-        console.log("slice =", action.payload.data)
         state.currentUser = action.payload.data.user;
         state.error = null;
       })
@@ -166,5 +168,5 @@ const userSlice = createSlice({
       });
   },
 });
-
+export const { setCurrentUser } = userSlice.actions;
 export default userSlice.reducer;
