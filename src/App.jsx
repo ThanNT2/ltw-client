@@ -2,11 +2,17 @@ import { Routes, Route } from "react-router-dom";
 import { publicRoutes, privateRoutes } from "./routes";
 import PrivateRoute from "./components/PrivateRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
-
+import useSocket from "./hooks/useSocket.js";
 // debug
 import TokenDebug from "./debug/TokenDebug.jsx";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "./stores/selectors/userSelectors";
+import { use } from "react";
 
 function App() {
+  const currentUser = useSelector(selectCurrentUser);
+  useSocket(currentUser?.id);
+
   return (
     <ErrorBoundary>
       <Routes>

@@ -9,7 +9,7 @@ import styles from "./UserLayout.module.scss";
 import { selectCurrentUser } from "../../stores/selectors/userSelectors";
 
 const UserLayout = () => {
-  console.log("userLayout")
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // const [currentUser, setCurrentUser] = useState(null);
   const currentUser = useSelector(selectCurrentUser);

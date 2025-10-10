@@ -18,6 +18,8 @@ const initialState = {
   accessToken: null,
   loading: false,
   error: null,
+  onlineUsers: [], // danh sách userId đang online
+  lastSocketEvent: null, // debug hoặc tracking
 };
 
 const userSlice = createSlice({
@@ -27,6 +29,34 @@ const userSlice = createSlice({
     // có thể thêm reducers sync nếu cần
     setCurrentUser: (state, action) => {
       state.currentUser = action.payload;
+    },
+    // --- 🧠 Realtime reducers ---
+    setOnlineUsers: (state, action) => {
+      state.onlineUsers = action.payload; // mảng userId
+    },
+    addOnlineUser: (state, action) => {
+      if (!state.onlineUsers.includes(action.payload)) {
+        state.onlineUsers.push(action.payload);
+      }
+    },
+    removeOnlineUser: (state, action) => {
+      state.onlineUsers = state.onlineUsers.filter(
+        (id) => id !== action.payload
+      );
+    },
+    // Cập nhật role/user info realtime
+    updateUserRealtime: (state, action) => {
+      const updatedData = action.payload;
+      if (state.currentUser && state.currentUser._id === updatedData._id) {
+        state.currentUser = {
+          ...state.currentUser,
+          ...updatedData,
+        };
+      }
+      state.lastSocketEvent = {
+        type: "user_updated",
+        time: new Date().toISOString(),
+      };
     },
   },
   extraReducers: (builder) => {
@@ -168,5 +198,11 @@ const userSlice = createSlice({
       });
   },
 });
-export const { setCurrentUser } = userSlice.actions;
+export const {
+  setCurrentUser,
+  setOnlineUsers,
+  addOnlineUser,
+  removeOnlineUser,
+  updateUserRealtime,
+} = userSlice.actions;
 export default userSlice.reducer;

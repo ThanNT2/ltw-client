@@ -2,7 +2,6 @@
 import React from "react";
 
 const HomePage = () => {
-  console.log("home")
   return (
     <div>
       <h2>Welcome to MyApp 🎉</h2>

@@ -1,9 +1,10 @@
 // src/store/index.js
-import { configureStore,combineReducers  } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // lưu vào localStorage
 import userReducer from "./slices/userSlice";
 import userManagementReducer from "./slices/userManagementSlice";
+import { socketMiddleware } from "../socket/socketMiddleware";
 
 // Cấu hình persist
 const persistConfig = {
@@ -29,7 +30,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false, // tắt cảnh báo redux-persist
-    }),
+    }).concat(socketMiddleware),
 });
 
 // Persistor (dùng cho PersistGate)
