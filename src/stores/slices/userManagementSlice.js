@@ -1,9 +1,15 @@
 // src/stores/slices/userManagementSlice.js
 import { createSlice } from "@reduxjs/toolkit";
-import { getAllUsersByAdminThunk, updateUserByAdminThunk, softDeleteUserByAdminThunk, restoreUserByAdminThunk } from "../thunks/userManagementThunks";
+import {
+  getAllUsersByAdminThunk,
+  updateUserByAdminThunk,
+  softDeleteUserByAdminThunk,
+  restoreUserByAdminThunk
+} from "../thunks/userManagementThunks";
 
 const initialState = {
   list: [],
+  onlineUsers: [],
   pagination: {
     page: 1,
     limit: 10,
@@ -37,6 +43,37 @@ const userManagementSlice = createSlice({
     resetState() {
       return initialState;
     },
+
+    // ✅ thêm reducers realtime
+    setOnlineUsers(state, action) {
+      const onlineIds = action.payload || [];
+      console.log("✅ Socket update online users vcl:", onlineIds);
+      state.onlineUsers = onlineIds;
+
+      // Cập nhật trạng thái online của từng user trong list
+      state.list = state.list.map((u) => ({
+        ...u,
+        onlineStatus: onlineIds.includes(u.id || u._id) ? "online" : "offline",
+      }));
+    },
+
+    addOnlineUser(state, action) {
+      const userId = action.payload;
+      if (!state.onlineUsers.includes(userId)) {
+        state.onlineUsers.push(userId);
+      }
+      state.list = state.list.map((u) =>
+        (u.id || u._id) === userId ? { ...u, onlineStatus: "online" } : u
+      );
+    },
+
+    removeOnlineUser(state, action) {
+      const userId = action.payload;
+      state.onlineUsers = state.onlineUsers.filter((id) => id !== userId);
+      state.list = state.list.map((u) =>
+        (u.id || u._id) === userId ? { ...u, onlineStatus: "offline" } : u
+      );
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -59,6 +96,11 @@ const userManagementSlice = createSlice({
           state.pagination.limit = pagination.limit ?? state.pagination.limit;
           state.pagination.total = pagination.total ?? 0;
           state.pagination.totalPages = pagination.totalPages ?? 0;
+        } else {
+          state.pagination.page = 1;
+          state.pagination.limit = 10;
+          state.pagination.total = 0;
+          state.pagination.totalPages = 0;
         }
       })
       .addCase(getAllUsersByAdminThunk.rejected, (state, action) => {
@@ -150,7 +192,15 @@ const userManagementSlice = createSlice({
   },
 });
 
-export const { setFilters, setPagination, resetState } = userManagementSlice.actions;
+export const {
+  setList,
+  setOnlineUsers,
+  addOnlineUser,
+  removeOnlineUser,
+  setFilters,
+  setPagination,
+  resetState
+} = userManagementSlice.actions;
 export default userManagementSlice.reducer;
 
 

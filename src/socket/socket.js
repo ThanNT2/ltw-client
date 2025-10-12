@@ -1,14 +1,22 @@
 // src/socket/socket.js
 import { io } from "socket.io-client";
 
+let socketInstance = null;
 // ✅ URL trỏ về backend (thường từ .env)
-const SOCKET_URL = import.meta.env.REACT_APP_SERVER_BASE_URLSV || "http://localhost:9000";
+// const SOCKET_URL = import.meta.env.REACT_APP_SERVER_BASE_URLSV || "http://localhost:9000";
 
-const socket = io(SOCKET_URL, {
-    transports: ["websocket"], // bắt buộc để tránh lỗi CORS
-    autoConnect: false, // chỉ connect khi user đăng nhập
-    withCredentials: true,
-    transports: ["websocket"],
-});
+export const getSocket = () => {
+    if (!socketInstance) {
+        socketInstance = io(import.meta.env.REACT_APP_SERVER_BASE_URLSV || "http://localhost:9000", {
+            autoConnect: false,
+            reconnection: true,
+            reconnectionAttempts: 5,
+            transports: ["websocket"],
+        });
+        console.log("🧩 Socket instance created");
+    }
+    return socketInstance;
+};
 
-export default socket;
+// ✅ Export mặc định
+export default getSocket();
