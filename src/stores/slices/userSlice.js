@@ -18,6 +18,8 @@ const initialState = {
   accessToken: null,
   loading: false,
   error: null,
+
+  // 🧠 Realtime tracking
   onlineUsers: [], // danh sách userId đang online
   lastSocketEvent: null, // debug hoặc tracking
 };
@@ -44,17 +46,28 @@ const userSlice = createSlice({
         (id) => id !== action.payload
       );
     },
-    // Cập nhật role/user info realtime
-    updateUserRealtime: (state, action) => {
-      const updatedData = action.payload;
-      if (state.currentUser && state.currentUser._id === updatedData._id) {
-        state.currentUser = {
-          ...state.currentUser,
-          ...updatedData,
-        };
+    // 🔄 Khi server báo có cập nhật realtime (role, profile, status, v.v.)
+    updateUserRealtime(state, action) {
+      const updated = action.payload;
+      const curr = state.currentUser;
+
+      // 1️⃣ Nếu là chính user đang đăng nhập
+      if (curr && (curr._id === updated._id || curr.id === updated._id)) {
+        state.currentUser = { ...curr, ...updated };
+
+        // 🧨 Nếu user bị khóa hoặc xóa → đăng xuất
+        if (updated.isActive === false || updated.isDeleted === true) {
+          state.isAuthenticated = false;
+          state.accessToken = null;
+          state.currentUser = null;
+          console.warn("🚪 User bị khóa hoặc xóa, tự động logout realtime");
+        }
       }
+
+      // 2️⃣ Ghi lại sự kiện realtime để debug/tracking
       state.lastSocketEvent = {
         type: "user_updated",
+        payload: updated,
         time: new Date().toISOString(),
       };
     },

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
+// import { toast } from "react-toastify";
 import {
   getAllUsersByAdminThunk,
   softDeleteUserByAdminThunk,
@@ -14,6 +15,7 @@ import {
 } from "../../../stores/selectors/userManagementSelectors";
 import { selectCurrentUser } from "../../../stores/selectors/userSelectors";
 import { setPagination } from "../../../stores/slices/userManagementSlice";
+import { emitSocketEvent } from "../../../socket/socketMiddleware"; // ✅ thêm emit socket event
 import styles from "./userManagement.module.scss";
 import UserFilter from "../UserFilter/UserFilter";
 import UserTable from "../UserTable/userTable";
@@ -21,7 +23,7 @@ import UserModal from "../Modal/userUpdateModal";
 
 /** --- ENV setup --- */
 const API_BASE_URL =
-  (import.meta?.env?.VITE_API_BASE_URL) || "http://localhost:9000/api";
+  import.meta?.env?.VITE_API_BASE_URL || "http://localhost:9000/api";
 const SERVER_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
 /** --- Export helper --- */
@@ -138,14 +140,28 @@ const UserManagement = () => {
   }, [dispatch, page, limit, filters]);
 
   /** --- Handlers --- */
-  const handleChangeRole = (userId, newRole, oldRole) => {
+  const handleChangeRole = async (userId, newRole, oldRole) => {
     if (!userId || newRole === oldRole) return;
-    dispatch(updateUserByAdminThunk({ userId, payload: { role: newRole } }));
+
+    try {
+      await dispatch(
+        updateUserByAdminThunk({ userId, payload: { role: newRole } })
+      ).unwrap();
+
+      // toast.success("✅ Cập nhật quyền người dùng thành công");
+
+      // ⚡ Emit realtime event để client user nhận cập nhật role ngay
+      emitSocketEvent("update_role", { userId, newRole });
+    } catch (error) {
+      console.error("❌ Lỗi khi cập nhật role:", error);
+      // toast.error("Không thể cập nhật quyền người dùng");
+    }
   };
 
   const handleSoftDelete = (userId) => {
     if (userId) dispatch(softDeleteUserByAdminThunk(userId));
   };
+
   const handleRestore = (userId) => {
     if (userId) dispatch(restoreUserByAdminThunk(userId));
   };
@@ -154,6 +170,7 @@ const UserManagement = () => {
     setSelectedUser(user);
     setIsModalOpen(true);
   };
+
   const handleSave = (updated) => {
     if (updated?._id)
       dispatch(
@@ -162,6 +179,7 @@ const UserManagement = () => {
     setIsModalOpen(false);
     setSelectedUser(null);
   };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedUser(null);
@@ -263,7 +281,7 @@ const UserManagement = () => {
           limit={limit}
           serverBaseUrl={SERVER_BASE_URL}
           currentUserRole={currentUserRole}
-          currentUserId={currentUser?.id}
+          currentUserId={currentUser?._id || currentUser?.id}
           onPageChange={handlePageChange}
           onLimitChange={handleLimitChange}
           onEditUser={handleEdit}

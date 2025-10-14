@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import PropTypes from "prop-types";
-import { useSelector } from "react-redux"; // 👈 Thêm dòng này
+import { useSelector } from "react-redux";
 import styles from "./userTable.module.scss";
 
 const ROLES = ["admin", "moderator", "user"];
@@ -16,12 +16,11 @@ const UserTableRow = memo(
     onChangeRole,
     onSoftDeleteUser,
     onRestoreUser,
-    onlineUsers, // 👈 nhận thêm từ props
+    onlineUsers,
   }) => {
-    console.log("onlineUsers =", onlineUsers);
     const roleLabel = user.role || "user";
     const isOnline = onlineUsers?.includes(String(user._id || user.id));
-    const onlineClass = isOnline ? styles.online : styles.offline; // 👈 xác định trạng thái online/offline
+    const onlineClass = isOnline ? styles.online : styles.offline;
 
     const isAdmin = currentUserRole === "admin";
     const canModify = isAdmin && !user.isDeleted;
@@ -40,7 +39,7 @@ const UserTableRow = memo(
               alt="avatar"
               className={styles.avatar}
             />
-            <span className={`${styles.statusDot} ${onlineClass}`}></span> {/* 👈 Dot trạng thái */}
+            <span className={`${styles.statusDot} ${onlineClass}`}></span>
           </div>
         </td>
         <td data-label="Email">{user.email}</td>
@@ -105,9 +104,7 @@ const UserTableRow = memo(
                   </button>
                   <button
                     className={styles.delete}
-                    onClick={() =>
-                      onSoftDeleteUser?.(user._id || user.id)
-                    }
+                    onClick={() => onSoftDeleteUser?.(user._id || user.id)}
                     disabled={!isAdmin}
                   >
                     Xóa
@@ -130,6 +127,133 @@ const UserTableRow = memo(
   }
 );
 
+const UserCard = memo(
+  ({
+    user,
+    index,
+    serverBaseUrl,
+    currentUserRole,
+    currentUserId,
+    onEditUser,
+    onChangeRole,
+    onSoftDeleteUser,
+    onRestoreUser,
+    onlineUsers,
+  }) => {
+    const roleLabel = user.role || "user";
+    const isOnline = onlineUsers?.includes(String(user._id || user.id));
+    const onlineClass = isOnline ? styles.online : styles.offline;
+    const isAdmin = currentUserRole === "admin";
+    const canModify = isAdmin && !user.isDeleted;
+    const isSelf = String(user._id || user.id) === String(currentUserId);
+
+    return (
+      <div className={styles.card} key={user._id || user.id}>
+        <div className={styles.cardHeader}>
+          <div className={styles.avatarWrapper}>
+            <img
+              src={
+                user.avatar
+                  ? `${serverBaseUrl}${user.avatar}`
+                  : `${serverBaseUrl}/uploads/avatars/default-avatar.png`
+              }
+              alt="avatar"
+              className={styles.avatar}
+            />
+            <span className={`${styles.statusDot} ${onlineClass}`}></span>
+          </div>
+          <div className={styles.cardTitle}>
+            <div className={styles.cardName}>{user.username || user.name}</div>
+            <div className={styles.cardEmail}>{user.email}</div>
+          </div>
+          <div className={styles.cardIndex}>#{index}</div>
+        </div>
+
+        <div className={styles.cardBody}>
+          <div className={styles.fieldGroup}>
+            <div className={styles.field}>
+              <span className={styles.fieldLabel}>Điện thoại:</span>
+              <span className={styles.fieldValue}>{user.phone || "—"}</span>
+            </div>
+            <div className={styles.field}>
+              <span className={styles.fieldLabel}>Coin:</span>
+              <span className={styles.fieldValue}>
+                {user.coin?.toLocaleString("vi-VN") || "0"}
+              </span>
+            </div>
+            <div className={styles.field}>
+              <span className={styles.fieldLabel}>Phân quyền:</span>
+              <select
+                value={roleLabel}
+                onChange={(e) =>
+                  onChangeRole?.(user._id || user.id, e.target.value, user.role)
+                }
+                className={`${styles.role} ${styles[roleLabel] || styles.user}`}
+                disabled={!canModify}
+              >
+                {ROLES.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.field}>
+              <span className={styles.fieldLabel}>Trạng thái:</span>
+              <span
+                className={`${styles.fieldValue} ${user.isActive ? styles.active : styles.blocked
+                  }`}
+              >
+                {user.isActive ? "Hoạt động" : "Bị khóa"}
+              </span>
+            </div>
+            <div className={styles.field}>
+              <span className={styles.fieldLabel}>Đã xóa:</span>
+              <span
+                className={`${styles.fieldValue} ${user.isDeleted ? styles.deleted : styles.normal
+                  }`}
+              >
+                {user.isDeleted ? "Đã xóa" : "Bình thường"}
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.actions}>
+            {!user.isDeleted ? (
+              !isSelf && (
+                <>
+                  <button
+                    className={styles.edit}
+                    onClick={() => onEditUser?.(user)}
+                    disabled={!isAdmin}
+                  >
+                    Sửa
+                  </button>
+                  <button
+                    className={styles.delete}
+                    onClick={() => onSoftDeleteUser?.(user._id || user.id)}
+                    disabled={!isAdmin}
+                  >
+                    Xóa
+                  </button>
+                </>
+              )
+            ) : (
+              <button
+                className={styles.restore}
+                onClick={() => onRestoreUser?.(user._id || user.id)}
+                disabled={!isAdmin}
+              >
+                Khôi phục
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+
 const UserTable = ({
   users,
   loading,
@@ -147,8 +271,7 @@ const UserTable = ({
   onSoftDeleteUser,
   onRestoreUser,
 }) => {
-  const onlineUsers = useSelector((state) => state.userManagement.onlineUsers);// 👈 lấy danh sách user online từ Redux
-  console.log("dkm user online =", onlineUsers);
+  const onlineUsers = useSelector((state) => state.userManagement.onlineUsers);
 
   if (loading)
     return <p className={styles.loading}>Đang tải dữ liệu...</p>;
@@ -157,6 +280,7 @@ const UserTable = ({
 
   return (
     <>
+      {/* ====== Desktop Table ====== */}
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
@@ -166,7 +290,7 @@ const UserTable = ({
               <th>Họ & tên</th>
               <th>Điện thoại</th>
               <th>Coin</th>
-              <th className={styles.roleCol}>Phân quyền</th>
+              <th>Phân quyền</th>
               <th>Ngày tạo</th>
               <th>Cập nhật</th>
               <th>Last Login</th>
@@ -188,14 +312,33 @@ const UserTable = ({
                 onChangeRole={onChangeRole}
                 onSoftDeleteUser={onSoftDeleteUser}
                 onRestoreUser={onRestoreUser}
-                onlineUsers={onlineUsers} // 👈 truyền xuống Row
+                onlineUsers={onlineUsers}
               />
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* --- Pagination --- */}
+      {/* ====== Mobile Card List ====== */}
+      <div className={styles.cardList}>
+        {users.map((u, idx) => (
+          <UserCard
+            key={u.id || u._id || idx}
+            user={u}
+            index={(page - 1) * limit + idx + 1}
+            serverBaseUrl={serverBaseUrl}
+            currentUserRole={currentUserRole}
+            currentUserId={currentUserId}
+            onEditUser={onEditUser}
+            onChangeRole={onChangeRole}
+            onSoftDeleteUser={onSoftDeleteUser}
+            onRestoreUser={onRestoreUser}
+            onlineUsers={onlineUsers}
+          />
+        ))}
+      </div>
+
+      {/* ====== Pagination ====== */}
       <div className={styles.pagination}>
         <div className={styles.pageControls}>
           <button onClick={() => onPageChange(page - 1)} disabled={page <= 1}>

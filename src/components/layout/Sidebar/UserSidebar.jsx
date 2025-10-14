@@ -2,25 +2,26 @@
 import React, { useState } from "react";
 import styles from "./UserSidebar.module.scss";
 import { NavLink } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { User, LayoutDashboard, ChevronDown, ChevronRight } from "lucide-react";
 
-const UserSidebar = ({ isOpen, onClose, currentUser }) => {
+const UserSidebar = ({ isOpen, onClose }) => {
   const [open, setOpen] = useState({ user: true, dashboard: false });
-
   const toggle = (section) => setOpen((prev) => ({ ...prev, [section]: !prev[section] }));
 
-  // ✅ Kiểm tra quyền
+  // ✅ Lấy currentUser từ Redux store — realtime cập nhật
+  const currentUser = useSelector((state) => state.user.currentUser);
+  console.log("currenrUser sidebar =", currentUser.role)
   const role = currentUser?.role || "user";
-  console.log(currentUser)
   const canSeeDashboard = ["admin", "moderator"].includes(role);
+
+  console.log("🧠 Sidebar render — current role:", role);
 
   return (
     <aside className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}>
       <div className={styles.sidebarHeader}>
         <h2>Menu</h2>
-        <button className={styles.closeBtn} onClick={onClose}>
-          ✕
-        </button>
+        <button className={styles.closeBtn} onClick={onClose}>✕</button>
       </div>
 
       <nav className={styles.menu}>
@@ -34,6 +35,7 @@ const UserSidebar = ({ isOpen, onClose, currentUser }) => {
           <User size={18} className={styles.icon} />
           <span>User</span>
         </button>
+
         {open.user && (
           <div className={styles.submenu}>
             <NavLink
