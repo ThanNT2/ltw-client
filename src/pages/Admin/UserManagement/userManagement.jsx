@@ -1,7 +1,7 @@
+// src/features/UserManagement/UserManagement.jsx
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
-// import { toast } from "react-toastify";
 import {
   getAllUsersByAdminThunk,
   softDeleteUserByAdminThunk,
@@ -14,19 +14,21 @@ import {
   selectUserManagementLoading,
 } from "../../../stores/selectors/userManagementSelectors";
 import { selectCurrentUser } from "../../../stores/selectors/userSelectors";
-import { setPagination } from "../../../stores/slices/userManagementSlice";
-import { emitSocketEvent } from "../../../socket/socketMiddleware"; // ✅ thêm emit socket event
+import { setPagination, updateUserRealtime } from "../../../stores/slices/userManagementSlice";
+import { emitSocketEvent } from "../../../socket/socketMiddleware";
+import socket from "../../../socket/socket";
 import styles from "./userManagement.module.scss";
 import UserFilter from "../UserFilter/UserFilter";
 import UserTable from "../UserTable/userTable";
 import UserModal from "../Modal/userUpdateModal";
+// import { toast } from "react-toastify";
 
 /** --- ENV setup --- */
 const API_BASE_URL =
   import.meta?.env?.VITE_API_BASE_URL || "http://localhost:9000/api";
 const SERVER_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
-/** --- Export helper --- */
+/** --- Helper xuất dữ liệu --- */
 const exportUserData = (data, type, filename) => {
   if (!data?.length) return;
   let content, mimeType, ext;
@@ -88,7 +90,7 @@ const exportUserData = (data, type, filename) => {
   window.URL.revokeObjectURL(url);
 };
 
-/** --- Component --- */
+/** --- Component chính --- */
 const UserManagement = () => {
   const dispatch = useDispatch();
   const users = useSelector(selectUserList);
@@ -139,6 +141,37 @@ const UserManagement = () => {
     );
   }, [dispatch, page, limit, filters]);
 
+  /** --- ⚡ Realtime update từ socket --- */
+  useEffect(() => {
+    if (!currentUser?._id) return;
+
+    if (!socket.connected) socket.connect();
+    socket.emit("user_online", currentUser._id);
+
+    const handleRoleUpdated = (data) => {
+      console.log("📢 [Realtime] role_updated:", data);
+      if (data?._id) {
+        dispatch(updateUserRealtime(data));
+        // toast.info(`👤 User ${data._id} vừa được đổi role thành ${data.role}`);
+      }
+    };
+
+    const handleAdminUserRoleUpdated = (data) => {
+      console.log("📢 [Realtime] admin_user_role_updated:", data);
+      if (data?._id) {
+        dispatch(updateUserRealtime(data));
+      }
+    };
+
+    socket.on("role_updated", handleRoleUpdated);
+    socket.on("admin_user_role_updated", handleAdminUserRoleUpdated);
+
+    return () => {
+      socket.off("role_updated", handleRoleUpdated);
+      socket.off("admin_user_role_updated", handleAdminUserRoleUpdated);
+    };
+  }, [dispatch, currentUser?._id]);
+
   /** --- Handlers --- */
   const handleChangeRole = async (userId, newRole, oldRole) => {
     if (!userId || newRole === oldRole) return;
@@ -149,8 +182,6 @@ const UserManagement = () => {
       ).unwrap();
 
       // toast.success("✅ Cập nhật quyền người dùng thành công");
-
-      // ⚡ Emit realtime event để client user nhận cập nhật role ngay
       emitSocketEvent("update_role", { userId, newRole });
     } catch (error) {
       console.error("❌ Lỗi khi cập nhật role:", error);

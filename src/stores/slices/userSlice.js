@@ -71,6 +71,7 @@ const userSlice = createSlice({
         time: new Date().toISOString(),
       };
     },
+    reset: () => initialState, // 🔑 reset toàn bộ state
   },
   extraReducers: (builder) => {
     builder
@@ -112,15 +113,19 @@ const userSlice = createSlice({
 
       // 🔹 Refresh token
       .addCase(refreshTokenThunk.fulfilled, (state, action) => {
-        console.log("slice =", action.payload.data)
+        console.log("✅ Refresh token thành công:", action.payload);
 
         state.accessToken = action.payload.accessToken;
+        state.tokenExpiresAt = action.payload.expiresIn || null;
         state.isAuthenticated = true;
+        state.error = null;
       })
-      .addCase(refreshTokenThunk.rejected, (state) => {
+      .addCase(refreshTokenThunk.rejected, (state, action) => {
+        console.warn("⚠️ Refresh token thất bại:", action.payload);
         state.isAuthenticated = false;
         state.accessToken = null;
         state.currentUser = null;
+        state.error = action.payload || "Refresh token failed";
       })
 
       // 🔹 Logout
@@ -217,5 +222,6 @@ export const {
   addOnlineUser,
   removeOnlineUser,
   updateUserRealtime,
+  reset
 } = userSlice.actions;
 export default userSlice.reducer;

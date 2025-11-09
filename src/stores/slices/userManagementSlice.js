@@ -4,7 +4,7 @@ import {
   getAllUsersByAdminThunk,
   updateUserByAdminThunk,
   softDeleteUserByAdminThunk,
-  restoreUserByAdminThunk
+  restoreUserByAdminThunk,
 } from "../thunks/userManagementThunks";
 
 const initialState = {
@@ -44,16 +44,14 @@ const userManagementSlice = createSlice({
       return initialState;
     },
 
-    // ✅ thêm reducers realtime
+    /** ✅ Realtime cập nhật online/offline */
     setOnlineUsers(state, action) {
       const onlineIds = action.payload || [];
-      console.log("✅ Socket update online users vcl:", onlineIds);
+      console.log("✅ Socket update online users:", onlineIds);
       state.onlineUsers = onlineIds;
-
-      // Cập nhật trạng thái online của từng user trong list
       state.list = state.list.map((u) => ({
         ...u,
-        onlineStatus: onlineIds.includes(u.id || u._id) ? "online" : "offline",
+        onlineStatus: onlineIds.includes(u._id || u.id) ? "online" : "offline",
       }));
     },
 
@@ -63,7 +61,7 @@ const userManagementSlice = createSlice({
         state.onlineUsers.push(userId);
       }
       state.list = state.list.map((u) =>
-        (u.id || u._id) === userId ? { ...u, onlineStatus: "online" } : u
+        (u._id || u.id) === userId ? { ...u, onlineStatus: "online" } : u
       );
     },
 
@@ -71,12 +69,29 @@ const userManagementSlice = createSlice({
       const userId = action.payload;
       state.onlineUsers = state.onlineUsers.filter((id) => id !== userId);
       state.list = state.list.map((u) =>
-        (u.id || u._id) === userId ? { ...u, onlineStatus: "offline" } : u
+        (u._id || u.id) === userId ? { ...u, onlineStatus: "offline" } : u
       );
     },
+
+    /** ⚡ NEW: Realtime cập nhật khi role hoặc profile user thay đổi */
+    updateUserRealtime(state, action) {
+      const updatedUser = action.payload;
+      if (!updatedUser?._id && !updatedUser?.id) return;
+
+      const targetId = updatedUser._id || updatedUser.id;
+      const idx = state.list.findIndex(
+        (u) => (u._id || u.id) === targetId
+      );
+      if (idx !== -1) {
+        state.list[idx] = { ...state.list[idx], ...updatedUser };
+        console.log("⚡ Updated user realtime:", updatedUser);
+      }
+    },
   },
+
   extraReducers: (builder) => {
     builder
+      /** ---- GET ALL ---- */
       .addCase(getAllUsersByAdminThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -85,122 +100,115 @@ const userManagementSlice = createSlice({
         state.loading = false;
         state.error = null;
 
-        // API format: { success, message, data: { items, pagination } }
         const payload = action.payload?.data || {};
         const { items, pagination } = payload;
-
         state.list = Array.isArray(items) ? items : [];
 
         if (pagination) {
-          state.pagination.page = pagination.page ?? state.pagination.page;
-          state.pagination.limit = pagination.limit ?? state.pagination.limit;
-          state.pagination.total = pagination.total ?? 0;
-          state.pagination.totalPages = pagination.totalPages ?? 0;
+          state.pagination = {
+            page: pagination.page ?? 1,
+            limit: pagination.limit ?? 10,
+            total: pagination.total ?? 0,
+            totalPages: pagination.totalPages ?? 0,
+          };
         } else {
-          state.pagination.page = 1;
-          state.pagination.limit = 10;
-          state.pagination.total = 0;
-          state.pagination.totalPages = 0;
+          state.pagination = { page: 1, limit: 10, total: 0, totalPages: 0 };
         }
       })
       .addCase(getAllUsersByAdminThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || action.error?.message || "Tải danh sách người dùng thất bại";
+        state.error =
+          action.payload ||
+          action.error?.message ||
+          "Tải danh sách người dùng thất bại";
       })
-      // update user by Admin
+
+      /** ---- UPDATE USER ---- */
       .addCase(updateUserByAdminThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(updateUserByAdminThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = null;
-        // User từ API (nếu có)
         const updatedUser = action.payload?.data;
-
-        // ID lấy từ payload hoặc fallback từ meta.arg
-        const updatedId = updatedUser?._id || updatedUser?.id || action.meta.arg?.id;
+        const updatedId =
+          updatedUser?._id || updatedUser?.id || action.meta.arg?.id;
 
         state.list = state.list.map((u) =>
-          u._id === updatedId || u.id === updatedId
-            ? updatedUser
-              ? { ...u, ...updatedUser } // ✅ merge theo API trả về
-              : { ...u, ...action.meta.arg?.data } // ✅ fallback merge theo dữ liệu client gửi
+          (u._id || u.id) === updatedId
+            ? { ...u, ...updatedUser }
             : u
         );
       })
       .addCase(updateUserByAdminThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || action.error?.message || "Cập nhật người dùng thất bại";
+        state.error =
+          action.payload ||
+          action.error?.message ||
+          "Cập nhật người dùng thất bại";
       })
-      //xóa mềm users by admin
+
+      /** ---- SOFT DELETE ---- */
       .addCase(softDeleteUserByAdminThunk.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(softDeleteUserByAdminThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = null;
-        // Nếu API có trả về user (đầy đủ fields)
         const updatedUser = action.payload?.data;
-
-        // Lấy ID từ payload hoặc fallback về arg
-        const deletedId = updatedUser?._id || updatedUser?.id || action.meta.arg;
-
+        const deletedId =
+          updatedUser?._id || updatedUser?.id || action.meta.arg;
         state.list = state.list.map((u) =>
-          u._id === deletedId || u.id === deletedId
+          (u._id || u.id) === deletedId
             ? updatedUser
-              // ✅ Trường hợp API trả user -> merge để đồng bộ chính xác
               ? { ...u, ...updatedUser }
-              // ✅ Trường hợp API chỉ trả success=true -> update thủ công
               : { ...u, isDeleted: true, isActive: false }
             : u
         );
       })
       .addCase(softDeleteUserByAdminThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || action.error?.message || "Xóa mềm người dùng thất bại";
+        state.error =
+          action.payload ||
+          action.error?.message ||
+          "Xóa mềm người dùng thất bại";
       })
-      //khoi phuc users by admin
+
+      /** ---- RESTORE ---- */
       .addCase(restoreUserByAdminThunk.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(restoreUserByAdminThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = null;
-        // Nếu API có trả về user (đầy đủ fields)
         const restoredUser = action.payload?.data;
-
-        // Lấy ID từ payload hoặc fallback từ arg
-        const restoredId = restoredUser?._id || restoredUser?.id || action.meta.arg;
+        const restoredId =
+          restoredUser?._id || restoredUser?.id || action.meta.arg;
 
         state.list = state.list.map((u) =>
-          u._id === restoredId || u.id === restoredId
+          (u._id || u.id) === restoredId
             ? restoredUser
-              // ✅ Nếu có user từ API → merge để không mất field
               ? { ...u, ...restoredUser }
-              // ✅ Nếu API chỉ trả success=true → fallback thủ công
               : { ...u, isDeleted: false, isActive: true }
             : u
         );
       })
       .addCase(restoreUserByAdminThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || action.error?.message || "Khoi phuc người dùng thất bại";
+        state.error =
+          action.payload ||
+          action.error?.message ||
+          "Khôi phục người dùng thất bại";
       });
   },
 });
 
 export const {
-  setList,
   setOnlineUsers,
   addOnlineUser,
   removeOnlineUser,
   setFilters,
   setPagination,
-  resetState
+  resetState,
+  updateUserRealtime, // 👈 thêm export này
 } = userManagementSlice.actions;
+
 export default userManagementSlice.reducer;
-
-

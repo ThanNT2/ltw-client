@@ -61,16 +61,19 @@
   gap: 0.5rem;
 }
 
+/* 🔹 Mỗi menuItem hiển thị icon + text + mũi tên phải */
 .menuItem {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   border-radius: 6px;
   transition: background 0.2s ease;
-  font-size: 14px; // Align with MainSidebar item size
+  font-size: 14px;
+  cursor: pointer;
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
@@ -81,12 +84,31 @@
     font-weight: 600;
   }
 
+  .leftGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
   .icon {
     flex-shrink: 0;
   }
+
+  .arrowIcon {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+  }
+
+  .arrowIcon.open {
+    transform: rotate(90deg);
+  }
 }
 
-// Parent menu (no background, subtle color)
 .parentItem {
   background: transparent !important;
   color: rgba(255, 255, 255, 0.9);
@@ -97,7 +119,6 @@
   }
 }
 
-// Submenu container and items (match MainSidebar spacing/size)
 .submenu {
   margin-left: 1.5rem;
   margin-top: 0.25rem;
@@ -113,11 +134,15 @@
   padding: 0.5rem 0.75rem;
   color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
-  font-size: 13px; // Align with MainSidebar submenu size
+  font-size: 13px;
   font-weight: 400;
   border-radius: 4px;
   transition: all 0.2s ease;
   position: relative;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
 
   &:hover {
     background: rgba(255, 255, 255, 0.03);
@@ -130,7 +155,7 @@
   }
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     left: -0.75rem;
     top: 50%;
@@ -139,5 +164,63 @@
     height: 3px;
     background: rgba(255, 255, 255, 0.2);
     border-radius: 50%;
+  }
+}
+
+/* 🟣 Sub-submenu (Vaults children) */
+.subsubmenu {
+  margin-left: 1.25rem;
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  border-left: 1px dashed rgba(255, 255, 255, 0.1);
+  padding-left: 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.parentSubItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .leftGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .icon {
+    flex-shrink: 0;
+  }
+
+  .arrowIcon {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+  }
+
+  .arrowIcon.open {
+    transform: rotate(90deg);
   }
 }

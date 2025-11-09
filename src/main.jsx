@@ -1,13 +1,16 @@
-import React from "react";
-import { StrictMode } from "react";
-import { createRoot} from "react-dom/client";
+import React, { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import store, { persistor } from "./stores"; // store Redux
+import store, { persistor } from "./stores";
+import App from "./App";
 import "./assets/styles/index.scss";
-import App from "./App.jsx";
-// import "./styles/global.scss";
+
+// ⚡️ Debug optional (chỉ bật khi DEV)
+if (import.meta.env.DEV) {
+  console.log("🚀 App running in DEV mode");
+}
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

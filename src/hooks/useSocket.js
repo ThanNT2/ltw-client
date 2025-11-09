@@ -1,25 +1,16 @@
-// src/hooks/useSocket.js
 import { useEffect } from "react";
 import socket from "../socket/socket";
 
 /**
- * Custom hook để khởi tạo và giám sát kết nối socket ở cấp component.
- * 👉 Không quản lý event logic (đã do socketMiddleware làm).
+ * Hook tối giản — chỉ để đảm bảo socket tồn tại & cleanup đúng.
+ * 👉 Không connect / emit ở đây nữa (middleware đã xử lý).
  */
-export default function useSocket(userId) {
+export default function useSocket() {
     useEffect(() => {
-        if (!userId) return;
-
-        console.log("👤 useSocket mounted for user:", userId);
-
-        // Nếu socket chưa kết nối, đảm bảo kết nối
-        if (!socket.connected) {
-            socket.connect();
-        }
+        // console.log("🔌 useSocket mounted");
 
         const handleConnect = () => {
-            console.log("🟢 Socket connected:", socket.id);
-            socket.emit("user_online", userId);
+            // console.log("🟢 Socket connected:", socket.id);
         };
 
         const handleDisconnect = (reason) => {
@@ -30,11 +21,11 @@ export default function useSocket(userId) {
         socket.on("disconnect", handleDisconnect);
 
         return () => {
-            console.log("🧹 Cleaning up socket listeners...");
+            console.log("🧹 Cleaning up useSocket listeners...");
             socket.off("connect", handleConnect);
             socket.off("disconnect", handleDisconnect);
         };
-    }, [userId]);
+    }, []);
 
     return socket;
 }
