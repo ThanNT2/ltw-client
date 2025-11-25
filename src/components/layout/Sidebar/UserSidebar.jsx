@@ -139,7 +139,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
                 {open.vaults && (
                   <div className={styles.subsubmenu}>
                     <NavLink
-                      to="/dashboard/vaults/master"
+                      to="/vaults/master"
                       className={({ isActive }) =>
                         `${styles.submenuItem} ${isActive ? styles.active : ""}`
                       }
@@ -149,7 +149,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
                     </NavLink>
 
                     <NavLink
-                      to="/dashboard/vaults/airdrop"
+                      to="/vaults/airdrop"
                       className={({ isActive }) =>
                         `${styles.submenuItem} ${isActive ? styles.active : ""}`
                       }
@@ -159,7 +159,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
                     </NavLink>
 
                     <NavLink
-                      to="/dashboard/vaults/reward"
+                      to="/vaults/reward"
                       className={({ isActive }) =>
                         `${styles.submenuItem} ${isActive ? styles.active : ""}`
                       }
@@ -169,7 +169,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
                     </NavLink>
 
                     <NavLink
-                      to="/dashboard/vaults/transactions"
+                      to="/vaults/transactions"
                       className={({ isActive }) =>
                         `${styles.submenuItem} ${isActive ? styles.active : ""}`
                       }

@@ -1,0 +1,224 @@
+/* Container */
+.container {
+    padding: 24px;
+
+    @media (max-width: 768px) {
+        padding: 16px;
+    }
+
+    @media (max-width: 480px) {
+        padding: 12px;
+    }
+}
+
+/* Page Title */
+.pageTitle {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 24px;
+
+    @media (max-width: 768px) {
+        font-size: 24px;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 20px;
+    }
+}
+
+/* Loading & Error */
+.loading {
+    color: #555;
+}
+
+.errorText {
+    color: #dc2626;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+/* Action Grid */
+.actionGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+
+    @media (max-width: 1024px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Card */
+.card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+    @media (max-width: 480px) {
+        padding: 16px;
+    }
+}
+
+/* Card Title */
+.cardTitle {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+
+    @media (max-width: 480px) {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+}
+
+/* Input */
+.input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+
+    @media (max-width: 480px) {
+        padding: 8px;
+    }
+}
+
+/* Button Group */
+.btnGroup {
+    display: flex;
+    gap: 10px;
+
+    @media (max-width: 480px) {
+        flex-direction: column;
+    }
+}
+
+/* Buttons */
+.btnGreen,
+.btnRed,
+.btnBlue {
+    width: 100%;
+    padding: 10px 16px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease;
+
+    &:hover {
+        opacity: 0.9;
+    }
+
+    @media (max-width: 480px) {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
+
+.btnGreen {
+    background: #16a34a;
+}
+
+.btnRed {
+    background: #dc2626;
+}
+
+.btnBlue {
+    background: #2563eb;
+}
+
+/* Vault Section */
+.vaultSection {
+    margin-top: 24px;
+}
+
+.sectionTitle {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+
+    @media (max-width: 768px) {
+        font-size: 18px;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 16px;
+    }
+}
+
+/* Vault Grid */
+.vaultGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+
+    @media (max-width: 1024px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Vault Card */
+.vaultCard {
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    @media (max-width: 480px) {
+        padding: 12px;
+    }
+}
+
+/* Vault Texts */
+.vaultName {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+
+    @media (max-width: 480px) {
+        font-size: 16px;
+    }
+}
+
+.vaultBalance {
+    font-size: 16px;
+    margin-bottom: 6px;
+
+    span {
+        font-weight: 700;
+        color: #2563eb;
+    }
+
+    @media (max-width: 480px) {
+        font-size: 14px;
+    }
+}
+
+.vaultType {
+    font-size: 14px;
+    color: #6b7280;
+
+    @media (max-width: 480px) {
+        font-size: 12px;
+    }
+}
+
+/* Vault Lock/Unlock button inside card */
+.vaultCard button {
+    margin-top: 8px;
+}

@@ -4,6 +4,7 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // lưu vào localStorage
 import userReducer from "./slices/userSlice";
 import userManagementReducer from "./slices/userManagementSlice";
+import vaultMasterReducer from "./slices/Vaults/vaultMasterSlice";
 import { socketMiddleware } from "../socket/socketMiddleware";
 
 // Cấu hình persist
@@ -18,6 +19,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   user: userReducer,
   userManagement: userManagementReducer,
+  vaultMaster: vaultMasterReducer,
 });
 
 // Tạo persistedReducer

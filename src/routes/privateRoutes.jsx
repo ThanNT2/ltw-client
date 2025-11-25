@@ -2,6 +2,7 @@ import ChangePasswordPage from "../pages/Auth/ChangedPasswordPage";
 import UserProfilePage from "../pages/User/Profile/ProfilePage";
 import UserLayout from "../layouts/UserLayout/UserLayout";
 import UserManagement from "../pages/Admin/UserManagement/userManagement";
+import VaultMaster from "../pages/Vaults/VaultMaster/vaultMaster";
 
 const privateRoutes = [
   {
@@ -19,6 +20,10 @@ const privateRoutes = [
       {
         path: "admin/users",
         element: <UserManagement />,
+      },
+      {
+        path: "vaults/master",
+        element: <VaultMaster />,
       },
     ],
   },
