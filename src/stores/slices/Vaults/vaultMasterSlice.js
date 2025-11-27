@@ -15,6 +15,7 @@ import {
 
 const initialState = {
     balances: [],
+    locks: {},
     details: [],
     loading: false,
     error: null,
@@ -104,18 +105,25 @@ const vaultMasterSlice = createSlice({
 
         // ------------------- GET INFO -------------------
         builder
+            // --- Lấy số dư ---
             .addCase(getAllVaultBalances.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
             .addCase(getAllVaultBalances.fulfilled, (state, action) => {
                 state.loading = false;
-                state.balances = action.payload.data;
+
+                const { balances, locks } = action.payload || {};
+
+                state.balances = balances || {};
+                state.locks = locks || {};
             })
             .addCase(getAllVaultBalances.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload;
+                state.error = action.error?.message || "Lỗi tải dữ liệu Vault.";
             })
+
+
 
             .addCase(getAllVaultDetails.pending, (state) => {
                 state.loading = true;

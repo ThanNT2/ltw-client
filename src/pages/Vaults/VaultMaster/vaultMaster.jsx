@@ -12,6 +12,7 @@ import {
 
 import {
     selectVaultBalances,
+    selectVaultLocks,
     selectVaultLoading,
     selectVaultError,
 } from "../../../stores/selectors/Vaults/vaultMasterSelectors";
@@ -22,45 +23,31 @@ const VaultMaster = () => {
     const dispatch = useDispatch();
 
     const balances = useSelector(selectVaultBalances);
+    const locks = useSelector(selectVaultLocks);
     const loading = useSelector(selectVaultLoading);
     const error = useSelector(selectVaultError);
 
-    // --- Input states ---
     const [mintBurnAmount, setMintBurnAmount] = useState("");
     const [transferAmount, setTransferAmount] = useState("");
     const [fromVault, setFromVault] = useState("");
     const [toVault, setToVault] = useState("");
 
-    // --- Vault lock state ---
-    const [vaultLocks, setVaultLocks] = useState({});
-
-    // Load vault balances
+    // Load data on mount
     useEffect(() => {
         dispatch(getAllVaultBalances());
     }, [dispatch]);
 
-    // Khởi tạo vaultLocks nếu balances thay đổi
-    useEffect(() => {
-        if (balances) {
-            const initialLocks = {};
-            Object.keys(balances).forEach((key) => {
-                if (vaultLocks[key] === undefined) initialLocks[key] = false;
-                else initialLocks[key] = vaultLocks[key];
-            });
-            setVaultLocks(initialLocks);
-        }
-    }, [balances]);
+    // ========= HANDLERS =========
 
-    // --- Handlers ---
     const handleMint = async () => {
-        if (vaultLocks["MasterVault"]) return alert("Vault Master đang bị Lock! Không thể Mint.");
+        if (locks?.master) return alert("MasterVault đang bị LOCK! Không thể Mint.");
         await dispatch(mintMaster({ amount: Number(mintBurnAmount) }));
         dispatch(getAllVaultBalances());
         setMintBurnAmount("");
     };
 
     const handleBurn = async () => {
-        if (vaultLocks["MasterVault"]) return alert("Vault Master đang bị Lock! Không thể Burn.");
+        if (locks?.master) return alert("MasterVault đang bị LOCK! Không thể Burn.");
         await dispatch(burnMaster({ amount: Number(mintBurnAmount) }));
         dispatch(getAllVaultBalances());
         setMintBurnAmount("");
@@ -71,9 +58,12 @@ const VaultMaster = () => {
         if (!toVault) return alert("Vui lòng chọn TO VAULT!");
         if (fromVault === toVault) return alert("FROM và TO không được trùng nhau!");
         if (!transferAmount || transferAmount <= 0) return alert("Amount phải lớn hơn 0!");
-        if (Number(transferAmount) > balances[fromVault]) return alert("Amount vượt quá số dư của Vault nguồn!");
-        if (vaultLocks[fromVault]) return alert("Vault nguồn đang bị Lock! Không thể Transfer.");
-        if (vaultLocks[toVault]) return alert("Vault đích đang bị Lock! Không thể Transfer.");
+
+        if (Number(transferAmount) > balances[fromVault])
+            return alert("Amount vượt quá số dư của Vault nguồn!");
+
+        if (locks?.[fromVault]) return alert("Vault nguồn đang bị LOCK!");
+        if (locks?.[toVault]) return alert("Vault đích đang bị LOCK!");
 
         await dispatch(
             transferBetweenVaults({
@@ -82,6 +72,7 @@ const VaultMaster = () => {
                 toVaultType: toVault,
             })
         );
+
         dispatch(getAllVaultBalances());
         setTransferAmount("");
         setFromVault("");
@@ -90,16 +81,9 @@ const VaultMaster = () => {
 
     const handleToggleLock = async (vaultKey) => {
         try {
-            if (vaultLocks[vaultKey]) {
-                // Hiện đang locked, gọi unlock
-                await dispatch(unlockVault(vaultKey));
-                setVaultLocks((prev) => ({ ...prev, [vaultKey]: false }));
-            } else {
-                // Hiện đang unlocked, gọi lock
-                await dispatch(lockVault(vaultKey));
-                setVaultLocks((prev) => ({ ...prev, [vaultKey]: true }));
-            }
-            // Cập nhật lại balances nếu cần
+            if (locks?.[vaultKey]) await dispatch(unlockVault(vaultKey));
+            else await dispatch(lockVault(vaultKey));
+
             dispatch(getAllVaultBalances());
         } catch (err) {
             console.error("Lock/Unlock error:", err);
@@ -114,11 +98,12 @@ const VaultMaster = () => {
             {loading && <p className={styles.loading}>Đang tải dữ liệu...</p>}
             {error && <p className={styles.errorText}>{error?.message || error}</p>}
 
-            {/* --- ACTION CARDS --- */}
+            {/* --- ACTION SECTION --- */}
             <div className={styles.actionGrid}>
                 {/* Mint & Burn */}
                 <div className={styles.card}>
                     <h2 className={styles.cardTitle}>Mint / Burn Coin</h2>
+
                     <input
                         type="number"
                         placeholder="Amount..."
@@ -126,6 +111,7 @@ const VaultMaster = () => {
                         onChange={(e) => setMintBurnAmount(e.target.value)}
                         className={styles.input}
                     />
+
                     <div className={styles.btnGroup}>
                         <button onClick={handleMint} className={styles.btnGreen}>
                             Mint
@@ -136,9 +122,10 @@ const VaultMaster = () => {
                     </div>
                 </div>
 
-                {/* Transfer */}
+                {/* Transfer Vault */}
                 <div className={styles.card}>
                     <h2 className={styles.cardTitle}>Transfer Vault</h2>
+
                     <select
                         value={fromVault}
                         onChange={(e) => setFromVault(e.target.value)}
@@ -147,7 +134,7 @@ const VaultMaster = () => {
                         <option value="">-- Chọn Vault nguồn --</option>
                         {Object.entries(balances).map(([key, value]) => (
                             <option key={key} value={key}>
-                                {key} (Số dư: {value}) {vaultLocks[key] ? "[Locked]" : ""}
+                                {key} (Số dư: {value}) {locks?.[key] ? "[Locked]" : ""}
                             </option>
                         ))}
                     </select>
@@ -162,7 +149,7 @@ const VaultMaster = () => {
                             .filter(([key]) => key !== fromVault)
                             .map(([key, value]) => (
                                 <option key={key} value={key}>
-                                    {key} (Số dư: {value}) {vaultLocks[key] ? "[Locked]" : ""}
+                                    {key} (Số dư: {value}) {locks?.[key] ? "[Locked]" : ""}
                                 </option>
                             ))}
                     </select>
@@ -185,24 +172,23 @@ const VaultMaster = () => {
             <div className={styles.vaultSection}>
                 <h2 className={styles.sectionTitle}>Danh sách Vault</h2>
 
-                {(!balances || Object.keys(balances).length === 0) ? (
+                {!balances ? (
                     <p>Không có dữ liệu vault.</p>
                 ) : (
                     <div className={styles.vaultGrid}>
                         {Object.entries(balances).map(([key, value]) => (
                             <div key={key} className={styles.vaultCard}>
                                 <h3 className={styles.vaultName}>{key}</h3>
+
                                 <p className={styles.vaultBalance}>
                                     Số dư: <span>{value}</span>
                                 </p>
-                                <p className={styles.vaultType}>Loại: {key}</p>
 
-                                {/* Lock / Unlock button từ server */}
                                 <button
                                     onClick={() => handleToggleLock(key)}
-                                    className={vaultLocks[key] ? styles.btnRed : styles.btnGreen}
+                                    className={locks?.[key] ? styles.btnRed : styles.btnGreen}
                                 >
-                                    {vaultLocks[key] ? "Unlock" : "Lock"}
+                                    {locks?.[key] ? "Unlock" : "Lock"}
                                 </button>
                             </div>
                         ))}

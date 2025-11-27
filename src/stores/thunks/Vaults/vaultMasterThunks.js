@@ -73,12 +73,19 @@ export const getAllVaultBalances = createAsyncThunk(
     "vaults/getAllVaultBalances",
     async (_, { rejectWithValue }) => {
         try {
-            return await vaultMasterService.getAllVaultBalances();
+            const response = await vaultMasterService.getAllVaultBalances();
+
+            // Đảm bảo chỉ lấy đúng data cần thiết
+            return {
+                balances: response.data.balances || {},
+                locks: response.data.locks || {}
+            };
         } catch (error) {
             return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
+
 
 // Lấy thông tin chi tiết các vault con
 export const getAllVaultDetails = createAsyncThunk(

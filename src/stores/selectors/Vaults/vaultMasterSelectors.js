@@ -6,6 +6,9 @@ export const selectVaultState = (state) => state.vaultMaster;
 // Lấy danh sách balances
 export const selectVaultBalances = (state) => state.vaultMaster.balances;
 
+// Lấy locks từ state
+export const selectVaultLocks = (state) => state.vaultMaster.locks;
+
 // Lấy chi tiết các vault con
 export const selectVaultDetails = (state) => state.vaultMaster.details;
 
