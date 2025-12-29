@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import {
     getAllVaultBalances,
@@ -21,6 +22,7 @@ import styles from "./vaultMaster.module.scss";
 
 const VaultMaster = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const balances = useSelector(selectVaultBalances);
     const locks = useSelector(selectVaultLocks);
@@ -32,13 +34,11 @@ const VaultMaster = () => {
     const [fromVault, setFromVault] = useState("");
     const [toVault, setToVault] = useState("");
 
-    // Load data on mount
     useEffect(() => {
         dispatch(getAllVaultBalances());
     }, [dispatch]);
 
-    // ========= HANDLERS =========
-
+    // --- Handlers ---
     const handleMint = async () => {
         if (locks?.master) return alert("MasterVault đang bị LOCK! Không thể Mint.");
         await dispatch(mintMaster({ amount: Number(mintBurnAmount) }));
@@ -83,12 +83,24 @@ const VaultMaster = () => {
         try {
             if (locks?.[vaultKey]) await dispatch(unlockVault(vaultKey));
             else await dispatch(lockVault(vaultKey));
-
             dispatch(getAllVaultBalances());
         } catch (err) {
             console.error("Lock/Unlock error:", err);
             alert("Có lỗi khi thay đổi trạng thái Vault.");
         }
+    };
+
+    const handleGoToVaultDetail = (vaultKey, e) => {
+        // Ripple effect
+        const card = e.currentTarget;
+        const ripple = document.createElement("span");
+        ripple.className = styles.ripple;
+        card.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 600);
+
+        console.log("Go to vault detail:", vaultKey);
+        // Navigate to vault detail
+        navigate(`/vaults/${vaultKey}`);
     };
 
     return (
@@ -100,10 +112,8 @@ const VaultMaster = () => {
 
             {/* --- ACTION SECTION --- */}
             <div className={styles.actionGrid}>
-                {/* Mint & Burn */}
                 <div className={styles.card}>
                     <h2 className={styles.cardTitle}>Mint / Burn Coin</h2>
-
                     <input
                         type="number"
                         placeholder="Amount..."
@@ -111,7 +121,6 @@ const VaultMaster = () => {
                         onChange={(e) => setMintBurnAmount(e.target.value)}
                         className={styles.input}
                     />
-
                     <div className={styles.btnGroup}>
                         <button onClick={handleMint} className={styles.btnGreen}>
                             Mint
@@ -122,10 +131,8 @@ const VaultMaster = () => {
                     </div>
                 </div>
 
-                {/* Transfer Vault */}
                 <div className={styles.card}>
                     <h2 className={styles.cardTitle}>Transfer Vault</h2>
-
                     <select
                         value={fromVault}
                         onChange={(e) => setFromVault(e.target.value)}
@@ -161,7 +168,6 @@ const VaultMaster = () => {
                         onChange={(e) => setTransferAmount(e.target.value)}
                         className={styles.input}
                     />
-
                     <button onClick={handleTransfer} className={styles.btnBlue}>
                         Transfer
                     </button>
@@ -171,25 +177,32 @@ const VaultMaster = () => {
             {/* --- VAULT LIST --- */}
             <div className={styles.vaultSection}>
                 <h2 className={styles.sectionTitle}>Danh sách Vault</h2>
-
                 {!balances ? (
                     <p>Không có dữ liệu vault.</p>
                 ) : (
                     <div className={styles.vaultGrid}>
                         {Object.entries(balances).map(([key, value]) => (
-                            <div key={key} className={styles.vaultCard}>
-                                <h3 className={styles.vaultName}>{key}</h3>
-
-                                <p className={styles.vaultBalance}>
-                                    Số dư: <span>{value}</span>
-                                </p>
-
-                                <button
-                                    onClick={() => handleToggleLock(key)}
-                                    className={locks?.[key] ? styles.btnRed : styles.btnGreen}
-                                >
-                                    {locks?.[key] ? "Unlock" : "Lock"}
-                                </button>
+                            <div
+                                key={key}
+                                className={styles.vaultCard}
+                                onClick={(e) => handleGoToVaultDetail(key, e)}
+                                data-tooltip="Xem chi tiết vault"
+                            >
+                                <div className={styles.vaultInner}>
+                                    <h3 className={styles.vaultName}>{key}</h3>
+                                    <p className={styles.vaultBalance}>
+                                        Số dư: <span>{value}</span>
+                                    </p>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleToggleLock(key);
+                                        }}
+                                        className={locks?.[key] ? styles.btnRed : styles.btnGreen}
+                                    >
+                                        {locks?.[key] ? "Unlock" : "Lock"}
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>

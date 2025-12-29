@@ -159,13 +159,34 @@ const UserSidebar = ({ isOpen, onClose }) => {
                     </NavLink>
 
                     <NavLink
-                      to="/vaults/reward"
+                      to="/vaults/gamerewards"
                       className={({ isActive }) =>
                         `${styles.submenuItem} ${isActive ? styles.active : ""}`
                       }
                       onClick={onClose}
                     >
                       Vault Reward
+                    </NavLink>
+
+
+                    <NavLink
+                      to="/vaults/marketing"
+                      className={({ isActive }) =>
+                        `${styles.submenuItem} ${isActive ? styles.active : ""}`
+                      }
+                      onClick={onClose}
+                    >
+                      Vault Maketing
+                    </NavLink>
+
+                    <NavLink
+                      to="/vaults/reserve"
+                      className={({ isActive }) =>
+                        `${styles.submenuItem} ${isActive ? styles.active : ""}`
+                      }
+                      onClick={onClose}
+                    >
+                      Vault Reserve
                     </NavLink>
 
                     <NavLink

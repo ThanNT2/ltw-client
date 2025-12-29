@@ -1,0 +1,134 @@
+/* src/features/vaults/vaultAirdrop.module.scss */
+
+.wrapper {
+    padding: 24px;
+    background: #f6f8fb;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ===== Header ===== */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    h2 {
+        font-size: 22px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .status {
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 500;
+        text-transform: capitalize;
+
+        &.active {
+            background: #e6f9ef;
+            color: #047857;
+        }
+
+        &.inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    }
+}
+
+/* ===== Card ===== */
+.card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== Grid Info ===== */
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.infoItem {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 14px 16px;
+
+    label {
+        display: block;
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 4px;
+    }
+
+    span {
+        font-size: 15px;
+        font-weight: 500;
+        color: #111827;
+        word-break: break-word;
+    }
+}
+
+/* ===== Balance ===== */
+.balance {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+/* ===== Campaigns ===== */
+.campaignList {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.campaignItem {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px;
+    transition: all 0.2s ease;
+    background: #fff;
+
+    &:hover {
+        border-color: #2563eb;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    }
+
+    h4 {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #111827;
+    }
+
+    p {
+        font-size: 13px;
+        color: #6b7280;
+        margin: 2px 0;
+    }
+
+    .campaignStatus {
+        margin-top: 6px;
+        display: inline-block;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #e5e7eb;
+        color: #374151;
+    }
+}
+
+/* ===== Footer Meta ===== */
+.meta {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 12px;
+}
