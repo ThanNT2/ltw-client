@@ -24,6 +24,7 @@ const VaultAirdrop = () => {
      * Select state
      * ---------------------------- */
     const details = useSelector(selectVaultAirdropDetails);
+    console.log("vaultAirdrop =", details)
     const loading = useSelector(selectVaultAirdropLoading);
     const actionLoading = useSelector(selectVaultAirdropActionLoading);
     const error = useSelector(selectVaultAirdropError);
@@ -63,7 +64,7 @@ const VaultAirdrop = () => {
     }
 
     const {
-        id,
+        _id,
         name,
         description,
         type,
@@ -93,7 +94,7 @@ const VaultAirdrop = () => {
                 <div className={styles.infoGrid}>
                     <div className={styles.infoItem}>
                         <label>Vault ID</label>
-                        <span>{id}</span>
+                        <span>{_id}</span>
                     </div>
 
                     <div className={styles.infoItem}>

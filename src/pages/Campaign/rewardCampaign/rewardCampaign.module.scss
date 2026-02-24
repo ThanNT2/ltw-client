@@ -1,0 +1,216 @@
+/* ===============================
+ * Layout
+ * =============================== */
+.wrapper {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ===============================
+ * Header
+ * =============================== */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    h2 {
+        font-size: 20px;
+        font-weight: 600;
+    }
+}
+
+.createBtn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #4f46e5;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: #4338ca;
+    }
+
+    &:active {
+        transform: translateY(1px);
+    }
+}
+
+/* ===============================
+ * Table (Desktop / Tablet)
+ * =============================== */
+.table {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow-x: auto;
+    background: #fff;
+}
+
+.tableHeader,
+.row {
+    display: grid;
+    grid-template-columns:
+        minmax(180px, 2fr)
+        /* Name */
+        minmax(90px, 1fr)
+        /* Type */
+        minmax(90px, 1fr)
+        /* Status */
+        minmax(160px, 1.2fr)
+        /* Time */
+        minmax(140px, 1.2fr)
+        /* Vault */
+        minmax(120px, 1fr)
+        /* Budget */
+        minmax(120px, 1fr)
+        /* Distributed */
+        minmax(120px, 1fr)
+        /* Remaining */
+        minmax(110px, 1fr)
+        /* Participants */
+        minmax(90px, 0.8fr);
+    /* Actions */
+
+    padding: 12px 16px;
+    align-items: center;
+    column-gap: 12px;
+}
+
+.tableHeader {
+    background: #f9fafb;
+    font-weight: 600;
+    font-size: 13px;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+    text-transform: uppercase;
+}
+
+.row {
+    font-size: 14px;
+    color: #1f2937;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease;
+
+    &:hover {
+        background: #f8fafc;
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===============================
+ * Status badge
+ * =============================== */
+.status {
+    font-weight: 500;
+    text-transform: capitalize;
+
+    &.active {
+        color: #16a34a;
+    }
+
+    &.inactive {
+        color: #f59e0b;
+    }
+
+    &.ended {
+        color: #ef4444;
+    }
+}
+
+/* ===============================
+ * Action button
+ * =============================== */
+.detailBtn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #e0e7ff;
+    background: #eef2ff;
+    color: #4338ca;
+
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+
+    transition: all 0.15s ease;
+
+    &:hover {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
+}
+
+
+/* ===============================
+ * Pagination
+ * =============================== */
+.pagination {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #64748b;
+    text-align: right;
+}
+
+/* ===============================
+ * Mobile Responsive
+ * =============================== */
+@media (max-width: 768px) {
+    .table {
+        border: none;
+        background: transparent;
+    }
+
+    .tableHeader {
+        display: none;
+    }
+
+    .row {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 14px;
+        border-radius: 10px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 12px;
+
+        span {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+
+            &::before {
+                content: attr(data-label);
+                font-size: 12px;
+                color: #64748b;
+            }
+        }
+    }
+
+    .detailBtn {
+        align-self: flex-end;
+        margin-top: 8px;
+    }
+}

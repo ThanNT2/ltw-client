@@ -1,9 +1,13 @@
+// src/services/axiosInstance.js
 import axios from "axios";
 import store from "../stores";
 import { refreshTokenThunk, logoutThunk } from "../stores/thunks/userThunks";
 
-// Cờ ngăn chặn các request khi đang logout
+// Cờ chặn request khi đang logout
 export const isForceLogout = { value: false };
+
+// ✅ Refresh single-flight (queue)
+let refreshPromise = null;
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:9000/api",
@@ -14,99 +18,149 @@ const axiosInstance = axios.create({
   },
 });
 
-/* 🟢 REQUEST INTERCEPTOR */
+/* =========================================================
+ * Helpers
+ * ========================================================= */
+
+const PUBLIC_ENDPOINTS = [
+  "/users/login",
+  "/users/register",
+  "/users/refresh-token",
+  "/users/forgot-password",
+  "/users/reset-password",
+];
+
+const isPublicRequest = (url = "") => {
+  return PUBLIC_ENDPOINTS.some((p) => url.includes(p));
+};
+
+const forceLogoutAndRedirect = async () => {
+  if (isForceLogout.value) return;
+  isForceLogout.value = true;
+
+  try {
+    // ✅ reset redux ngay để PrivateRoute không hiểu nhầm đang login
+    store.dispatch({ type: "user/reset" });
+
+    // cleanup storage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // ❗HttpOnly cookie FE không xoá được
+    // Nếu muốn xoá cookie refreshToken => gọi API logout (nhưng token có thể đã chết)
+    await store.dispatch(logoutThunk(true));
+  } finally {
+    window.location.href = "/login";
+  }
+};
+
+/* =========================================================
+ * 🟢 REQUEST INTERCEPTOR
+ * ========================================================= */
 axiosInstance.interceptors.request.use(
   (config) => {
-    console.log("📤 [REQUEST]", {
-      url: config.url,
-      headers: config.headers.Authorization,
-    });
     if (isForceLogout.value) {
-      console.warn("⛔ Bỏ qua request vì đang force logout");
       throw new axios.Cancel("Force logout in progress");
     }
 
-    const state = store.getState();
-    const token = state.user?.accessToken;
+    const url = config.url || "";
+
+    // ✅ Public API: tuyệt đối không gắn Authorization
+    if (isPublicRequest(url)) {
+      delete config.headers.Authorization;
+      return config;
+    }
+
+    const token = store.getState()?.user?.accessToken;
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      delete config.headers.Authorization;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-/* 🔴 RESPONSE INTERCEPTOR */
+/* =========================================================
+ * 🔴 RESPONSE INTERCEPTOR (refresh queue)
+ * ========================================================= */
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (isForceLogout.value) {
-      console.warn("⛔ Bỏ qua interceptor vì đang force logout");
+    if (isForceLogout.value) return Promise.reject(error);
+
+    if (!error?.response) {
+      // network error
       return Promise.reject(error);
     }
-
-    if (!error.response) return Promise.reject(error);
 
     const { status, data } = error.response;
     const originalRequest = error.config;
 
-    /* 🚫 CASE 1 — User bị xóa, token invalid hoặc đổi mật khẩu sau khi cấp token */
-    if (
-      status === 401 &&
-      ["USER_NOT_FOUND", "INVALID_TOKEN", "TOKEN_EXPIRED_AFTER_PASSWORD_CHANGE"].includes(data?.code)
-    ) {
-      console.warn("⚠️ Token không hợp lệ hoặc user đã bị xóa → force logout");
-      isForceLogout.value = true;
+    const url = originalRequest?.url || "";
+    const code = data?.code;
 
-      try {
-        localStorage.clear();
-        sessionStorage.clear();
-        document.cookie.split(";").forEach((c) => {
-          document.cookie = c
-            .replace(/^ +/, "")
-            .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
-
-        await store.dispatch(logoutThunk(true));
-      } finally {
-        window.location.href = "/login";
-      }
-
+    // ✅ Public endpoint thì không refresh / không retry
+    if (isPublicRequest(url)) {
       return Promise.reject(error);
     }
 
-    /* 🔁 CASE 2 — Token hết hạn (JWT_EXPIRES_IN) → refresh */
-    if (status === 401 && data?.code === "TOKEN_EXPIRED" && !originalRequest._retry) {
-      console.log("🟡 [INTERCEPTOR] Access token expired → Try refresh...");
+    // ✅ AUTH invalid -> logout luôn
+    const AUTH_INVALID_CODES = [
+      "USER_NOT_FOUND",
+      "INVALID_TOKEN",
+      "TOKEN_EXPIRED_AFTER_PASSWORD_CHANGE",
+    ];
 
+    if (status === 401 && AUTH_INVALID_CODES.includes(code)) {
+      await forceLogoutAndRedirect();
+      return Promise.reject(error);
+    }
+
+    // ✅ Access token expired -> refresh queue
+    if (status === 401 && code === "TOKEN_EXPIRED") {
+      // tránh loop retry vô hạn
+      if (originalRequest._retry) {
+        await forceLogoutAndRedirect();
+        return Promise.reject(error);
+      }
       originalRequest._retry = true;
-      try {
-        const resultAction = await store.dispatch(refreshTokenThunk());
-        console.log("🧩 [REFRESH RESULT ACTION]", resultAction);
-        if (refreshTokenThunk.fulfilled.match(resultAction)) {
-          const newAccessToken = resultAction.payload?.accessToken;
-          console.log("✅ [NEW ACCESS TOKEN]", newAccessToken);
-          if (!newAccessToken) throw new Error("Không có accessToken mới từ server");
 
-          // Gắn token mới cho các request sau
-          axiosInstance.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          console.log("🔁 [RETRY REQUEST]", originalRequest.url);
-          // Gọi lại request cũ
-          return axiosInstance(originalRequest);
-        } else {
-          console.warn("⚠️ Refresh token thất bại → logout");
-          await store.dispatch(logoutThunk(true));
-          window.location.href = "/login";
+      try {
+        // ✅ SINGLE FLIGHT: chỉ 1 refresh đang chạy
+        if (!refreshPromise) {
+          refreshPromise = store.dispatch(refreshTokenThunk()).then((action) => {
+            refreshPromise = null;
+
+            if (!refreshTokenThunk.fulfilled.match(action)) {
+              const msg = action?.payload?.message || "Refresh token failed";
+              const err = new Error(msg);
+              err.code = action?.payload?.code || "REFRESH_FAILED";
+              throw err;
+            }
+
+            return action.payload?.accessToken;
+          });
         }
-      } catch (refreshError) {
-        console.warn("⚠️ Refresh token error:", refreshError);
-        await store.dispatch(logoutThunk(true));
-        window.location.href = "/login";
+
+        const newAccessToken = await refreshPromise;
+
+        if (!newAccessToken) {
+          throw new Error("Missing accessToken after refresh");
+        }
+
+        // retry request với token mới
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return axiosInstance(originalRequest);
+      } catch (refreshErr) {
+        await forceLogoutAndRedirect();
+        return Promise.reject(refreshErr);
       }
     }
 
-    /* ❌ CASE 3 — Các lỗi khác */
     return Promise.reject(error);
   }
 );

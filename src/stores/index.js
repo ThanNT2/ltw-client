@@ -7,6 +7,7 @@ import userManagementReducer from "./slices/userManagementSlice";
 import vaultMasterReducer from "./slices/Vaults/vaultMasterSlice";
 import { socketMiddleware } from "../socket/socketMiddleware";
 import vaultAirdropReducer from "./slices/Vaults/vaultAirdropSlice";
+import rewardCampaignReducer from "./slices/Campaign/rewardCampaignSlice";
 
 // Cấu hình persist
 const persistConfig = {
@@ -22,6 +23,7 @@ const rootReducer = combineReducers({
   userManagement: userManagementReducer,
   vaultMaster: vaultMasterReducer,
   vaultAirdrop: vaultAirdropReducer,
+  rewardCampaign: rewardCampaignReducer,
 });
 
 // Tạo persistedReducer

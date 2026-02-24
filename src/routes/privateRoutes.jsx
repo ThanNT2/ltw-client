@@ -7,6 +7,9 @@ import VaultAirdrop from "../pages/Vaults/VaultAirdrop/vaultAirdrop";
 import VaultGameRewards from "../pages/Vaults/VaultGameReward/vaultGameReward";
 import VaultMarketing from "../pages/Vaults/VaultMarketing/vaultMarketing";
 import VaultReserve from "../pages/Vaults/VaultReserve/vaultReserve";
+import RewardCampaign from "../pages/Campaign/rewardCampaign/rewardCampaign";
+import CreateCampaign from "../pages/Campaign/createCampaign/createRewardCampaign";
+import CampaignDetailPage from "../pages/Campaign/DetailCampaign/CampaignDetailPage";
 import { Vault } from "lucide-react";
 
 const privateRoutes = [
@@ -46,6 +49,27 @@ const privateRoutes = [
         path: "vaults/reserve",
         element: <VaultReserve />,
       },
+      {
+        path: "/campaign",
+        element: <RewardCampaign />,
+      },
+      {
+        path: "/campaign/rewardlog",
+        element: <VaultReserve />,
+      },
+      {
+        path: "/campaign/userrewardhistory",
+        element: <VaultReserve />,
+      },
+      {
+        path: "/campaign/create",
+        element: <CreateCampaign />,
+      },
+      {
+        path: "/campaign/:id",
+        element: <CampaignDetailPage />,
+      },
+
     ],
   },
 ];

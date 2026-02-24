@@ -1,0 +1,280 @@
+/* src/pages/Campaign/rewardCampaign/CampaignDetailPage.module.scss */
+
+.page {
+    padding: 20px;
+    max-width: 1200px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.titleBlock {
+    flex: 1;
+}
+
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.subTitle {
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+.muted {
+    color: #6b7280;
+}
+
+.badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.actionsGroup {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #111827;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.15s;
+}
+
+.btn:hover {
+    background: #f9fafb;
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btnPrimary {
+    border-color: #2563eb;
+    color: #2563eb;
+}
+
+.btnPrimary:hover {
+    background: rgba(37, 99, 235, 0.08);
+}
+
+.btnDanger {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.btnDanger:hover {
+    background: rgba(239, 68, 68, 0.08);
+}
+
+/* BADGE */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.badge_default {
+    background: #f3f4f6;
+    color: #111827;
+    border-color: #e5e7eb;
+}
+
+.badge_info {
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.badge_success {
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.badge_warning {
+    background: rgba(245, 158, 11, 0.14);
+    color: #92400e;
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.badge_danger {
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+@media (max-width: 980px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* CARD */
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #ffffff;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.cardHeader {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.cardHeader h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+/* Key-value layout */
+.kv {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 10px 12px;
+    padding: 14px;
+}
+
+@media (max-width: 520px) {
+    .kv {
+        grid-template-columns: 1fr;
+    }
+}
+
+.k {
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.v {
+    color: #111827;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.inlineCode {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+}
+
+/* JSON box */
+.jsonBox {
+    margin: 0;
+    padding: 14px;
+    background: #0b1220;
+    color: #e5e7eb;
+    font-size: 12px;
+    border-radius: 0;
+    max-height: 440px;
+    overflow: auto;
+}
+
+/* Error alert */
+.alertError {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #b91c1c;
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+/* Empty */
+.empty {
+    margin-top: 22px;
+    border: 1px dashed #e5e7eb;
+    border-radius: 14px;
+    padding: 18px;
+    background: #fafafa;
+}
+
+.empty h2 {
+    margin: 0 0 6px 0;
+}
+
+/* Skeleton */
+.skeletonHeader {
+    height: 70px;
+    border-radius: 14px;
+    background: linear-gradient(90deg, #f3f4f6, #e5e7eb, #f3f4f6);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+}
+
+.skeletonGrid {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.skeletonCard {
+    height: 170px;
+    border-radius: 14px;
+    background: linear-gradient(90deg, #f3f4f6, #e5e7eb, #f3f4f6);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}

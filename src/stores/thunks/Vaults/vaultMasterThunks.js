@@ -74,6 +74,7 @@ export const getAllVaultBalances = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await vaultMasterService.getAllVaultBalances();
+            console.log("response =", response)
 
             // Đảm bảo chỉ lấy đúng data cần thiết
             return {

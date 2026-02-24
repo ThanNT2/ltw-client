@@ -10,7 +10,7 @@ import useSocketListeners from "./hooks/useSocketListeners";
 
 function App() {
   // Chỉ cần biết user đã đăng nhập hay chưa (middleware đã tự xử lý connect)
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  // const isAuthenticated = useSelector(selectIsAuthenticated);
 
   // Hook khởi tạo socket nền (không cần truyền userId nữa)
   useSocket();

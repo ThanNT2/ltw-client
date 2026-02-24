@@ -15,6 +15,7 @@ const UserSidebar = ({ isOpen, onClose }) => {
     user: true,
     dashboard: false,
     vaults: false,
+    campaign: false,
   });
 
   const toggle = (section) =>
@@ -197,6 +198,59 @@ const UserSidebar = ({ isOpen, onClose }) => {
                       onClick={onClose}
                     >
                       Vault Transactions
+                    </NavLink>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  className={`${styles.submenuItem} ${styles.parentSubItem}`}
+                  onClick={() => toggle("campaign")}
+                >
+                  <div className={styles.leftGroup}>
+                    <Layers size={16} className={styles.icon} />
+                    <span>Reward Campaign</span>
+                  </div>
+                  <span className={styles.arrowIcon}>
+                    {open.campaign ? (
+                      <ChevronDown size={12} />
+                    ) : (
+                      <ChevronRight size={12} />
+                    )}
+                  </span>
+                </button>
+
+                {/* campaign submenu list */}
+                {open.campaign && (
+                  <div className={styles.subsubmenu}>
+                    <NavLink
+                      to="/campaign"
+                      className={({ isActive }) =>
+                        `${styles.submenuItem} ${isActive ? styles.active : ""}`
+                      }
+                      onClick={onClose}
+                    >
+                      Campaigns
+                    </NavLink>
+
+                    <NavLink
+                      to="/campaign/rewardlog"
+                      className={({ isActive }) =>
+                        `${styles.submenuItem} ${isActive ? styles.active : ""}`
+                      }
+                      onClick={onClose}
+                    >
+                      Reward Logs
+                    </NavLink>
+
+                    <NavLink
+                      to="/campaign/userrewardhistory"
+                      className={({ isActive }) =>
+                        `${styles.submenuItem} ${isActive ? styles.active : ""}`
+                      }
+                      onClick={onClose}
+                    >
+                      User Reward History
                     </NavLink>
                   </div>
                 )}

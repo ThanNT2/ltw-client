@@ -1,192 +1,213 @@
 // src/stores/thunks/userThunks.js
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import userService from "../../services/userService";
-import { isForceLogout } from "../../services/axiosInstance";
 
-// Đăng nhập
+/* =========================================================
+ * Helpers
+ * ========================================================= */
+
+/**
+ * Chuẩn hóa error trả về từ axios
+ * - Luôn đảm bảo có message
+ * - Giữ code/status nếu backend trả
+ */
+const normalizeError = (err, fallbackMessage = "Request failed") => {
+  const res = err?.response;
+
+  // Backend trả error chuẩn: { success:false, message, code, ... }
+  if (res?.data) {
+    return {
+      ...res.data,
+      status: res.status,
+      message: res.data?.message || fallbackMessage,
+    };
+  }
+
+  // Axios không có response (network error)
+  return {
+    success: false,
+    message: err?.message || fallbackMessage,
+    code: "NETWORK_ERROR",
+    status: 0,
+  };
+};
+
+/**
+ * Chuẩn hóa response success cho Redux
+ * server nên trả: { success, message, data }
+ */
+const normalizeSuccess = (res) => {
+  // đảm bảo luôn có shape { success, message, data }
+  return {
+    success: !!res?.success,
+    message: res?.message || "",
+    data: res?.data ?? null,
+  };
+};
+
+/* =========================================================
+ * THUNKS
+ * ========================================================= */
+
+// ✅ LOGIN
 export const loginThunk = createAsyncThunk(
   "user/login",
   async (credentials, { rejectWithValue }) => {
     try {
-      return await userService.login(credentials); // { accessToken, user }
+      const res = await userService.login(credentials);
+      return normalizeSuccess(res);
     } catch (err) {
-      return rejectWithValue(err.response?.data || { message: "Login failed" });
+      return rejectWithValue(normalizeError(err, "Login failed"));
     }
   }
 );
 
-// Đăng ký
+// ✅ REGISTER
 export const registerThunk = createAsyncThunk(
   "user/register",
   async (payload, { rejectWithValue }) => {
     try {
-      return await userService.register(payload); // { success, message, data: { safeUser, accessToken } }
+      // server: { success, message, data: { user, accessToken, expiresIn, reward } }
+      const res = await userService.register(payload);
+      return normalizeSuccess(res);
     } catch (err) {
-      return rejectWithValue(err.response?.data || { message: "Register failed" });
+      return rejectWithValue(normalizeError(err, "Register failed"));
     }
   }
 );
 
-// Refresh token
+// ✅ REFRESH TOKEN
 export const refreshTokenThunk = createAsyncThunk(
   "user/refreshToken",
   async (_, { rejectWithValue }) => {
     try {
-      console.log("[Thunk] Calling /refresh-token ...");
       const res = await userService.refreshToken();
-      // Expect: { success, data: { accessToken, expiresIn } }
-      console.log("[Thunk] Response /refresh-token:", res);
+      // expect: { success, message, data: { accessToken, expiresIn } }
 
       const { accessToken, expiresIn } = res?.data || {};
 
-      if (accessToken) {
-        console.log("[Thunk] /refresh-token success:", {
-          accessToken,
-          expiresIn,
+      if (!accessToken) {
+        return rejectWithValue({
+          success: false,
+          message: "Không nhận được accessToken mới",
+          code: "INVALID_REFRESH_RESPONSE",
         });
-        // ✅ Trả về cả expiresIn để lưu lại trong Redux
-        return { accessToken, expiresIn };
-      } else {
-        console.error("[Thunk] /refresh-token missing accessToken:", res);
-        return rejectWithValue("Không nhận được accessToken mới");
       }
+
+      return {
+        accessToken,
+        expiresIn: expiresIn || null,
+      };
     } catch (err) {
-      console.error("[Thunk] /refresh-token error:", err);
-      return rejectWithValue(
-        err.response?.data || { message: "Refresh token failed" }
-      );
+      // Backend refresh nên trả: { message, code:"TOKEN_EXPIRED" ... }
+      return rejectWithValue(normalizeError(err, "Refresh token failed"));
     }
   }
 );
 
-
-// Lấy profile
+// ✅ GET PROFILE
 export const getProfileThunk = createAsyncThunk(
   "user/getProfile",
   async (_, { rejectWithValue }) => {
     try {
-      return await userService.getProfile(); // { id, username, email, avatar, ... }
+      const res = await userService.getProfile();
+      return normalizeSuccess(res);
     } catch (err) {
-      return rejectWithValue(
-        err.response?.data || { message: "Get profile failed" }
-      );
+      return rejectWithValue(normalizeError(err, "Get profile failed"));
     }
   }
 );
 
-// Cập nhật hồ sơ (bao gồm avatar)
+// ✅ UPDATE PROFILE
 export const updateProfileThunk = createAsyncThunk(
   "user/updateProfile",
   async (payload, { rejectWithValue }) => {
     try {
-      return await userService.updateProfile(payload); // { success, message, data: { user } }
+      const res = await userService.updateProfile(payload);
+      return normalizeSuccess(res);
     } catch (err) {
-      return rejectWithValue(
-        err.response?.data || { message: "Update profile failed" }
-      );
+      return rejectWithValue(normalizeError(err, "Update profile failed"));
     }
   }
 );
 
-// Đổi mật khẩu
+// ✅ CHANGE PASSWORD
 export const changePasswordThunk = createAsyncThunk(
   "user/changePassword",
   async (data, { rejectWithValue }) => {
     try {
-      return await userService.changePassword(data); // { success, message, data: { accessToken } }
+      const res = await userService.changePassword(data);
+      return normalizeSuccess(res);
     } catch (err) {
-      return rejectWithValue(
-        err.response?.data || { message: "Change password failed" }
-      );
+      return rejectWithValue(normalizeError(err, "Change password failed"));
     }
   }
 );
 
-// Quên mật khẩu
+// ✅ FORGOT PASSWORD
 export const forgotPasswordThunk = createAsyncThunk(
   "user/forgotPassword",
   async (email, { rejectWithValue }) => {
     try {
-      return await userService.forgotPassword(email); // { message }
+      const res = await userService.forgotPassword(email);
+      return normalizeSuccess(res);
     } catch (err) {
-      return rejectWithValue(
-        err.response?.data || { message: "Forgot password failed" }
-      );
+      return rejectWithValue(normalizeError(err, "Forgot password failed"));
     }
   }
 );
 
-// Reset mật khẩu
+// ✅ RESET PASSWORD
 export const resetPasswordThunk = createAsyncThunk(
   "user/resetPassword",
   async ({ token, data }, { rejectWithValue }) => {
     try {
-      return await userService.resetPassword(token, data); // { success, message }
+      const res = await userService.resetPassword(token, data);
+      return normalizeSuccess(res);
     } catch (err) {
-      return rejectWithValue(
-        err.response?.data || { message: "Reset password failed" }
-      );
+      return rejectWithValue(normalizeError(err, "Reset password failed"));
     }
   }
 );
-// Đăng xuất (chuẩn hóa & dọn sạch toàn bộ)
+
+// ✅ LOGOUT
 export const logoutThunk = createAsyncThunk(
   "user/logout",
   /**
-   * @param {boolean} skipApi - Nếu true → không gọi API /logout (dành cho force logout)
+   * @param {boolean} skipApi - true => force logout (không gọi API)
    */
   async (skipApi = false, { dispatch, rejectWithValue }) => {
-    console.log("🚪 [Thunk] Logging out...", { skipApi });
-
     try {
       if (!skipApi) {
-        // 🟢 Gọi API logout bình thường
         await userService.logout();
-      } else {
-        console.warn("⚠️ Force logout: bỏ qua gọi API /logout");
       }
-    } catch (error) {
-      if (!error?.response || error.response?.status !== 401) {
-        console.warn("⚠️ Logout API failed (token có thể đã hết hạn)");
+    } catch (err) {
+      // Logout fail thường không critical
+      // nhưng vẫn reject để dev debug nếu muốn
+      // -> KHÔNG reject nếu 401 (token hết hạn) để cleanup vẫn chạy
+      if (err?.response?.status !== 401) {
+        console.warn("⚠️ Logout API failed:", err?.response?.data || err?.message);
       }
     }
 
     try {
-      /* 🧹 Xóa toàn bộ dữ liệu phía client */
+      // cleanup client
       localStorage.clear();
       sessionStorage.clear();
 
-      // Xóa cookies (bao gồm token hoặc session nếu có)
-      if (typeof document !== "undefined") {
-        const cookies = document.cookie.split(";");
-        for (const cookie of cookies) {
-          const eqPos = cookie.indexOf("=");
-          const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;`;
-        }
-      }
-
-      /* 🔄 Reset toàn bộ Redux slices */
+      // reset redux
       dispatch({ type: "user/reset" });
       dispatch({ type: "userManagement/reset" });
       dispatch({ type: "notification/reset" });
       dispatch({ type: "socket/reset" });
 
-      /* 🚫 Đặt lại trạng thái force logout */
-      isForceLogout.value = false;
-
-      console.log("✅ [Thunk] Logout cleanup done.");
-
-      /* 🔁 Redirect về trang login nếu đang ở private route */
-      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-        window.location.href = "/login";
-      }
-
-      return { message: "Logout success" };
-    } catch (error) {
-      console.error("❌ [Thunk] Logout cleanup failed:", error);
-      return rejectWithValue("Logout failed during cleanup");
+      return { success: true, message: "Logout success" };
+    } catch (err) {
+      return rejectWithValue({
+        success: false,
+        message: "Logout failed during cleanup",
+        code: "LOGOUT_CLEANUP_FAILED",
+      });
     }
   }
 );
-

@@ -8,6 +8,7 @@ export const fetchVaultAirdropDetails = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const res = await vaultAirdropService.getDetails();
+            console.log("vaultAirdrop Thunks =", res.data)
             return res.data;
         } catch (err) {
             return rejectWithValue(err.response?.data || err.message);
